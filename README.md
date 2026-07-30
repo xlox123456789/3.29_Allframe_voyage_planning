@@ -1,5 +1,7 @@
 # 航海圖規劃器（中文版）— MVP
 
+🔗 **上線網址：https://xlox123456789.github.io/3.29_Allframe_voyage_planning/**
+
 《流放之路》3.29「全焰之咒」航海板（Voyage Board）規劃工具中文版。
 複刻自 [one-more-map/one-more-map.github.io](https://github.com/one-more-map/one-more-map.github.io)，
 資料改用實測遊戲貼上文字，介面全中文化。
@@ -34,12 +36,12 @@ npm run build     # 正式建置到 dist/
    git remote add origin https://github.com/你的帳號/voyage-solver-zh.git
    git push -u origin main
    ```
-3. **重要**：如果 repo 名稱不是 `你的帳號.github.io`（也就是不是根網域），
-   要在 `vite.config.ts` 加上 `base`，否則部署後資源路徑會 404：
+3. `vite.config.ts` 裡的 `base` 已經幫你設定成 `/3.29_Allframe_voyage_planning/`，跟你現在的 repo 名稱一致，不用再改。
+   如果之後改了 repo 名稱，記得同步修改這裡（前後都要有斜線），不然部署後會空白 404：
    ```ts
    export default defineConfig({
      plugins: [react()],
-     base: '/voyage-solver-zh/', // 改成你的 repo 名稱，前後都要有斜線
+     base: '/新的repo名稱/',
    })
    ```
 4. 到 repo 的 **Settings → Pages**，Source 選 **GitHub Actions**
