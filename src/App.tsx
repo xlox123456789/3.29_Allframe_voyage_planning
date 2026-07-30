@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import type { Board, Borders, ChartData } from './types'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Board, Borders, ChartData, Edges } from './types'
 import { emptyBorders } from './types'
 import { parseChartText } from './logic/parser'
 import { solve, type SolverResult } from './logic/solver'
@@ -9,42 +9,117 @@ import './index.css'
 
 const STRATEGY = STRATEGIES[0] // MVP：目前只做 Divine Border Rares
 
-// 12 段邊界，依畫面上的視覺位置排列（順時針編號 1-12，從左上角開始）
-// 對應到 types.ts 的 borderTouches 索引：0-2 上、3-5 右、6-8 下、9-11 左
-const BORDER_LAYOUT: { seg: number; badge: number }[] = [
-  { seg: 0, badge: 1 }, { seg: 1, badge: 2 }, { seg: 2, badge: 3 }, // 上排
-  { seg: 3, badge: 4 }, { seg: 4, badge: 5 }, { seg: 5, badge: 6 }, // 右排
-  { seg: 8, badge: 7 }, { seg: 7, badge: 8 }, { seg: 6, badge: 9 }, // 下排（右→左）
-  { seg: 11, badge: 10 }, { seg: 10, badge: 11 }, { seg: 9, badge: 12 }, // 左排（下→上）
-]
+// 12 段邊界，每段對應九宮格外圍固定的一格：上排/下排各對齊 3 個直欄，
+// 左排/右排各對齊 3 個橫列。segment 索引沿用 types.ts 的 borderTouches。
+const TOP = [0, 1, 2]
+const RIGHT = [3, 4, 5]
+const BOTTOM = [6, 7, 8]
+const LEFT = [9, 10, 11]
 
-function BorderSlot({
-  badge,
+// ---------------------------------------------------------------------------
+// 可打字搜尋的邊界選擇器
+// ---------------------------------------------------------------------------
+function BorderPicker({
   value,
   onChange,
+  align,
 }: {
-  badge: number
   value: string | null
   onChange: (v: string | null) => void
+  align: 'top' | 'bottom' | 'left' | 'right'
 }) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const rootRef = useRef<HTMLDivElement>(null)
   const mod = value ? borderModById.get(value) : null
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
+  const filtered = useMemo(() => {
+    const q = query.trim()
+    if (!q) return BORDER_MODS
+    return BORDER_MODS.filter((m) => m.text.includes(q) || m.short?.includes(q))
+  }, [query])
+
   return (
-    <label className={`border-slot ${mod ? 'set' : ''}`}>
-      <span className="badge">{badge}</span>
-      <select value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
-        <option value="">未擲出</option>
-        {BORDER_MODS.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.short ?? m.text}
-          </option>
-        ))}
-      </select>
-      <span className="border-slot-label">{mod?.short ?? '未擲出'}</span>
-    </label>
+    <div className={`border-picker align-${align}`} ref={rootRef}>
+      <button
+        type="button"
+        className={`border-pill ${mod ? 'set' : ''}`}
+        onClick={() => {
+          setOpen((o) => !o)
+          setQuery('')
+        }}
+        title={mod?.text ?? '點擊設定這段邊界'}
+      >
+        {mod?.short ?? '未擲出'}
+      </button>
+      {open && (
+        <div className="border-dropdown">
+          <input
+            autoFocus
+            className="border-search"
+            placeholder="輸入關鍵字快速搜尋…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="border-options">
+            <div
+              className="border-option clear"
+              onClick={() => {
+                onChange(null)
+                setOpen(false)
+              }}
+            >
+              （清空 / 未擲出）
+            </div>
+            {filtered.map((m) => (
+              <div
+                key={m.id}
+                className={`border-option ${m.id === value ? 'active' : ''}`}
+                onClick={() => {
+                  onChange(m.id)
+                  setOpen(false)
+                }}
+              >
+                {m.text}
+              </div>
+            ))}
+            {filtered.length === 0 && <div className="border-option empty">找不到符合的邊界詞綴</div>}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
-function BoardWithBorders({
+// ---------------------------------------------------------------------------
+// 海圖接口形狀小圖示（依 N/E/S/W 接口畫線，貼近遊戲內圖示風格）
+// ---------------------------------------------------------------------------
+function ShapeIcon({ edges }: { edges: Edges }) {
+  const [n, e, s, w] = edges
+  return (
+    <svg width="30" height="30" viewBox="0 0 30 30" className="shape-icon">
+      <rect x="0.5" y="0.5" width="29" height="29" rx="4" fill="#0a120e" stroke="#2c3f33" />
+      {n && <line x1="15" y1="1" x2="15" y2="13" className="on" />}
+      {s && <line x1="15" y1="17" x2="15" y2="29" className="on" />}
+      {w && <line x1="1" y1="15" x2="13" y2="15" className="on" />}
+      {e && <line x1="17" y1="15" x2="29" y2="15" className="on" />}
+      <circle cx="15" cy="15" r="2.5" className={n || e || s || w ? 'on' : 'off'} />
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 九宮格 + 對齊的 12 段邊界
+// ---------------------------------------------------------------------------
+function VoyageBoard({
   borders,
   onBorderChange,
   board,
@@ -55,51 +130,86 @@ function BoardWithBorders({
   board: Board | null
   charts: Map<string, ChartData>
 }) {
-  const byBadgeRow = (badges: number[]) => BORDER_LAYOUT.filter((b) => badges.includes(b.badge))
-  return (
-    <div className="board-frame">
-      <div className="frame-row top">
-        {byBadgeRow([1, 2, 3]).map((b) => (
-          <BorderSlot key={b.seg} badge={b.badge} value={borders[b.seg]} onChange={(v) => onBorderChange(b.seg, v)} />
-        ))}
-      </div>
-      <div className="frame-mid">
-        <div className="frame-col left">
-          {byBadgeRow([12, 11, 10]).map((b) => (
-            <BorderSlot key={b.seg} badge={b.badge} value={borders[b.seg]} onChange={(v) => onBorderChange(b.seg, v)} />
-          ))}
-        </div>
-        <div className="board-grid">
-          {Array.from({ length: 9 }, (_, i) => {
-            const p = board?.[i]
-            const chart = p ? charts.get(p.chartUid) : null
-            return (
-              <div key={i} className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}>
-                <span className="cell-index">{i + 1}</span>
-                {chart ? (
-                  <div className="cell-name">{chart.name}</div>
-                ) : (
-                  <div className="cell-empty">{i === 6 ? '⚓ 起點' : ''}</div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-        <div className="frame-col right">
-          {byBadgeRow([4, 5, 6]).map((b) => (
-            <BorderSlot key={b.seg} badge={b.badge} value={borders[b.seg]} onChange={(v) => onBorderChange(b.seg, v)} />
-          ))}
-        </div>
-      </div>
-      <div className="frame-row bottom">
-        {byBadgeRow([9, 8, 7]).map((b) => (
-          <BorderSlot key={b.seg} badge={b.badge} value={borders[b.seg]} onChange={(v) => onBorderChange(b.seg, v)} />
-        ))}
-      </div>
+  const cell = (col: number, row: number, node: React.ReactNode, key: string) => (
+    <div key={key} style={{ gridColumn: col, gridRow: row }} className="grid-slot">
+      {node}
     </div>
   )
+
+  const items: React.ReactNode[] = []
+  TOP.forEach((seg, i) =>
+    items.push(
+      cell(
+        i + 2,
+        1,
+        <BorderPicker align="top" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        `t${seg}`,
+      ),
+    ),
+  )
+  BOTTOM.forEach((seg, i) =>
+    items.push(
+      cell(
+        i + 2,
+        5,
+        <BorderPicker align="bottom" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        `b${seg}`,
+      ),
+    ),
+  )
+  LEFT.forEach((seg, i) =>
+    items.push(
+      cell(
+        1,
+        i + 2,
+        <BorderPicker align="left" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        `l${seg}`,
+      ),
+    ),
+  )
+  RIGHT.forEach((seg, i) =>
+    items.push(
+      cell(
+        5,
+        i + 2,
+        <BorderPicker align="right" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        `r${seg}`,
+      ),
+    ),
+  )
+
+  for (let i = 0; i < 9; i++) {
+    const row = Math.floor(i / 3)
+    const col = i % 3
+    const p = board?.[i]
+    const chart = p ? charts.get(p.chartUid) : null
+    items.push(
+      cell(
+        col + 2,
+        row + 2,
+        <div className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}>
+          {chart ? (
+            <>
+              <ShapeIcon edges={chart.edges} />
+              <div className="cell-name">{chart.name}</div>
+            </>
+          ) : i === 6 ? (
+            <div className="cell-empty">⚓<span>起點</span></div>
+          ) : (
+            <div className="cell-plus">＋</div>
+          )}
+        </div>,
+        `c${i}`,
+      ),
+    )
+  }
+
+  return <div className="voyage-board">{items}</div>
 }
 
+// ---------------------------------------------------------------------------
+// 海圖倉庫
+// ---------------------------------------------------------------------------
 function ChartLibrary({
   charts,
   onImport,
@@ -113,12 +223,11 @@ function ChartLibrary({
 }) {
   const [text, setText] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
-  const usable = charts.length
   return (
     <div className="library">
       <div className="library-header">
         <div>
-          <strong>{usable}</strong> 張可用海圖
+          <strong>{charts.length}</strong> 張可用海圖
         </div>
         <button className="ghost-btn" onClick={onClear} disabled={charts.length === 0}>
           清空倉庫
@@ -151,10 +260,11 @@ function ChartLibrary({
         {charts.length === 0 && <div className="empty-hint">尚無海圖，貼上文字後按「加入倉庫」</div>}
         {charts.map((c) => (
           <div key={c.uid} className="chart-row">
+            <ShapeIcon edges={c.edges} />
             <div className="chart-row-main">
               <div className="chart-row-name">{c.name}</div>
               <div className="chart-row-meta">
-                {c.shape ?? '形狀未知'} · Lv.{c.level}
+                {c.shape ?? '形狀未知'} · 等級 {c.level}
                 {c.implicitText ? ` · ${c.implicitText}` : ''}
               </div>
             </div>
@@ -209,9 +319,11 @@ export default function App() {
       </header>
 
       <div className="main-grid">
-        <section className="panel">
-          <h2>① 外框邊界詞綴 <span className="panel-sub">{borders.filter(Boolean).length} / 12 已設定</span></h2>
-          <BoardWithBorders
+        <section className="panel board-panel">
+          <h2>
+            ① 外框邊界詞綴 <span className="panel-sub">{borders.filter(Boolean).length} / 12 已設定</span>
+          </h2>
+          <VoyageBoard
             borders={borders}
             onBorderChange={(seg, v) => {
               const next = [...borders]
