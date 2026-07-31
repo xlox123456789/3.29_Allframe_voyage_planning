@@ -258,3 +258,15 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 .progress-fill { height: 100%; background: #5bb0c9; border-radius: 999px; transition: width 0.15s ease-out; }
 .progress-pct { font-size: 12px; color: #7f9587; min-width: 34px; text-align: right; }
 .result-meta { margin-top: 10px; font-size: 14px; color: #dfe8e0; }
+
+.site-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid #1e2b21;
+  color: #6b8072;
+  font-size: 12px;
+  text-align: center;
+}
+.site-footer-links { display: flex; justify-content: center; gap: 18px; margin-top: 8px; }
+.site-footer a { color: #5bb0c9; text-decoration: none; }
+.site-footer a:hover { color: #74c0d6; text-decoration: underline; }

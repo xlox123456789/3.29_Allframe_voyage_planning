@@ -535,6 +535,26 @@ export default function App() {
           </div>
         )}
       </section>
+
+      <footer className="site-footer">
+        <div>作者: 夏烏拉</div>
+        <div className="site-footer-links">
+          <a
+            href="https://github.com/xlox123456789/3.29_Allframe_voyage_planning"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GITHUB頁面
+          </a>
+          <a
+            href="https://github.com/xlox123456789/3.29_Allframe_voyage_planning/discussions"
+            target="_blank"
+            rel="noreferrer"
+          >
+            意見反饋區
+          </a>
+        </div>
+      </footer>
     </div>
   )
 }
