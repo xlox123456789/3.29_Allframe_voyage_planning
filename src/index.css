@@ -32,13 +32,13 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 
 .main-grid {
   display: grid;
-  grid-template-columns: 600px 300px 300px;
+  grid-template-columns: 700px 500px 500px;
   gap: 16px;
   align-items: start;
-  justify-content: center;
+  justify-content: start;
   width: 100%;
 }
-@media (max-width: 1340px) {
+@media (max-width: 1840px) {
   .main-grid { grid-template-columns: 1fr; }
   .main-grid .panel { width: 100%; }
 }
@@ -61,6 +61,14 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 .panel-sub { font-size: 12px; color: #5f7466; font-weight: normal; }
 .board-panel { overflow-x: auto; }
 .board-panel .voyage-board { margin-inline: auto; }
+.import-panel { height: 700px; }
+.import-panel .library { display: flex; flex-direction: column; height: calc(100% - 29px); }
+.import-panel textarea { flex: 1; min-height: 0; }
+.import-panel .primary-btn { align-self: flex-start; }
+@media (max-width: 1840px) {
+  .import-panel { height: auto; min-height: 520px; }
+  .import-panel .library { height: auto; min-height: 440px; }
+}
 
 /* ---------------------------------------------------------------------- */
 /* 九宮格 + 對齊邊界（5x5 grid：外圈是邊界，中間 3x3 是海圖格） */

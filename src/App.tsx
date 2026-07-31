@@ -451,7 +451,7 @@ export default function App() {
           />
         </section>
 
-        <section className="panel">
+        <section className="panel import-panel">
           <h2>複製貼上區</h2>
           <ChartImporter onImport={(cs) => setCharts((prev) => [...prev, ...cs])} lang={lang} />
         </section>
