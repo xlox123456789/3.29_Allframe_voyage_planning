@@ -3,6 +3,7 @@ import type { Board, Borders, ChartData, Edges } from './types'
 import { emptyBorders } from './types'
 import { parseChartText } from './logic/parser'
 import { solve, type SolverResult } from './logic/solver'
+import { rotateEdges } from './logic/connectivity'
 import { BORDER_MODS, borderModById } from './data/mods'
 import { STRATEGIES, type StrategyDef, type StrategyRequirement } from './data/strategies'
 import './index.css'
@@ -195,7 +196,7 @@ function VoyageBoard({
         <div className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}>
           {chart ? (
             <>
-              <ShapeIcon edges={chart.edges} />
+              <ShapeIcon edges={rotateEdges(chart.edges, p!.rotation)} />
               <div className="cell-name">{chart.name}</div>
             </>
           ) : i === 6 ? (
@@ -362,7 +363,7 @@ export default function App() {
     <div className="app">
       <header>
         <div className="header-top">
-          <div className="eyebrow">PATH OF EXILE · 深海全焰之咒</div>
+          <div className="eyebrow">PATH OF EXILE · 亡焰咒海</div>
           <div className="lang-toggle">
             <button className={lang === 'zh' ? 'active' : ''} onClick={() => setLang('zh')}>
               中
@@ -420,7 +421,7 @@ export default function App() {
 
         {(strategy.requiresBorderId || reqStates.length > 0) && (
           <>
-            <div className="checklist-title">需求檢查</div>
+            <div className="checklist-title">建議需求</div>
             <ul className="checklist">
               {strategy.requiresBorderId && (
                 <li className={borderOk ? 'ok' : 'bad'}>
