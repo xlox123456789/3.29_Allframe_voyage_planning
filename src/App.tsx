@@ -507,7 +507,7 @@ export default function App() {
       </section>
 
       <footer className="site-footer">
-        <div>作者: 夏烏拉</div>
+        <div>2026/7/31 夏烏拉</div>
         <div className="site-footer-links">
           <a
             href="https://github.com/xlox123456789/3.29_Allframe_voyage_planning"
@@ -547,8 +547,8 @@ function ChartImporter({
       <textarea
         placeholder={
           lang === 'en'
-            ? 'Ctrl+V paste a Chart (Ctrl+C in-game). You can paste several at once.'
-            : 'Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製），可一次貼多張'
+            ? 'Ctrl+V paste a Chart (Ctrl+C in-game).'
+            : 'Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製）'
         }
         value={text}
         onChange={(e) => setText(e.target.value)}
