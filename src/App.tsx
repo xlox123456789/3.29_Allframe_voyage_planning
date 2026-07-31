@@ -348,15 +348,21 @@ export default function App() {
   function runSolver() {
     setRunning(true)
     setProgress(0)
+    if (progressTimer.current) window.clearTimeout(progressTimer.current)
 
-    // 假進度條：實際求解通常很快，這裡用計時器模擬逐步推進的視覺效果，
-    // 卡在 92% 附近等真正算完才跳到 100%，讓使用者知道「還在跑」。
-    if (progressTimer.current) window.clearInterval(progressTimer.current)
-    progressTimer.current = window.setInterval(() => {
-      setProgress((p) => (p >= 92 ? 92 : p + Math.max(1, (92 - p) * 0.15)))
-    }, 120)
-
-    setTimeout(() => {
+    // 假進度條：solve() 本身是同步、會卡住畫面重繪的計算，所以不能一邊跑一邊用
+    // setInterval 更新（瀏覽器在計算期間完全沒空重繪，畫面只會看到 0 直接跳 100）。
+    // 改成先用一串各自獨立的 setTimeout 把進度條「演」到 92%，每一步都是獨立的
+    // 排程任務，瀏覽器才有機會真的重繪；演完之後才真正呼叫 solve()。
+    const steps = [12, 28, 46, 63, 78, 92]
+    let i = 0
+    const tick = () => {
+      if (i < steps.length) {
+        setProgress(steps[i])
+        i++
+        progressTimer.current = window.setTimeout(tick, 140)
+        return
+      }
       const results = solve(charts, borders, strategy.weights, {
         mode: 'connected',
         allowRotation: true,
@@ -366,13 +372,13 @@ export default function App() {
         strategyRules: strategy.rules,
       })
       setResult(results[0] ?? null)
-      if (progressTimer.current) window.clearInterval(progressTimer.current)
       setProgress(100)
-      setTimeout(() => {
+      progressTimer.current = window.setTimeout(() => {
         setRunning(false)
         setProgress(0)
       }, 350)
-    }, 10)
+    }
+    progressTimer.current = window.setTimeout(tick, 140)
   }
 
   return (
