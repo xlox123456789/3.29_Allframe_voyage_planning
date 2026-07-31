@@ -1,4 +1,4 @@
-# 航海圖規劃器（中文版）— MVP
+# 亡焰咒海 — MVP
 
 🔗 **上線網址：https://xlox123456789.github.io/3.29_Allframe_voyage_planning/**
 
@@ -6,15 +6,17 @@
 複刻自 [one-more-map/one-more-map.github.io](https://github.com/one-more-map/one-more-map.github.io)，
 資料改用實測遊戲貼上文字，介面全中文化。
 
-**目前進度：只做了 1 個策略（Divine Border Rares），其餘 4 個之後陸續補上。**
+**目前進度：4 個策略都已建立（Speedrun Strongboxes / Meatfish / Magic Ethereal / Divine Border Rares），
+但部分策略需要的海圖固定詞綴中文原文還沒收集齊，詳見下方「資料現況」。**
 
 ## 現在能做什麼
 
-1. 貼上遊戲內複製（Ctrl+C）的海圖文字，一次可貼多張
-2. 設定 12 段邊界（下拉選單，已內建完整 65 條邊界詞綴池）
-3. 按「開始規劃」，用 Divine Border Rares 策略的權重跑求解器，
-   把「Sea-Pillar 類型」圖表釘在神聖邊界那一格，其餘格子盡量塞滿稀有怪相關詞綴
-4. 顯示建議擺放結果（3×3 板子 + 分數 + 航道是否可行）
+1. 設定 12 段邊界（點格子彈出可打字搜尋的選單，已內建完整 65 條邊界詞綴池）
+2. 貼上遊戲內複製（Ctrl+C）的海圖文字到「海圖倉庫」，一次可貼多張
+3. 選擇策略（Speedrun Strongboxes / Meatfish / Magic Ethereal / Divine Border Rares），
+   下方會顯示這個策略的玩法說明與「需求檢查」（缺邊界或缺特定圖表會標紅提醒）
+4. 按「開始規劃」，求解器會依選定策略的權重與位置規則排出建議擺放
+5. 結果直接顯示在左邊的九宮格裡（含每張圖的接口形狀圖示）
 
 ## 本機開發
 
@@ -54,12 +56,13 @@ npm run build     # 正式建置到 dist/
 |---|---|
 | 5 種海圖形狀（終點/直線/轉角/交界處/十字口） | 完整 |
 | 12 段邊界詞綴池（65 條） | 完整（`src/data/mods.ts` 的 `BORDER_MODS`） |
-| 海圖固定詞綴（相鄰/航程效果） | 只收錄了實測樣本出現過的幾條，其餘遇到會保留原文但不參與計分 |
-| Sea-Pillar 類型圖表判定 | 還不知道真實中文名稱，暫時用「名稱含『柱』」比對，需要實測樣本校正 |
-| 星魚(star) / 神憑附(pantheon) / 金燈籠(box) / 附身(possess) / 破裂(fracture) 詞綴 | 尚無中文原文，Divine Border Rares 的次要權重目前不會生效 |
-| 其他 4 個策略（Speedrun Strongboxes / Meatfish / Magic Ethereal / Alc & Go） | 尚未實作 |
+| 海圖固定詞綴（相鄰/航程效果） | 大幅補齊，星魚/神憑附/荒林妖精/特工保險箱/瓶中信/附身/破裂/怪物不掉裝備等全部改用真實遊戲文字，`src/data/mods.ts` 有完整清單 |
+| Sea-Pillar 類型圖表判定 | 還不知道真實中文基礎類型名稱，暫時用「名稱含『柱』」比對 |
+| 「命運的保險箱」= Diviner's Strongbox？ | 中信度猜測，尚待驗證 |
+| 4 個策略的權重與位置規則 | 已全部生效，四個策略在測試資料下都能跑出非零分數的合理擺放 |
 
-要補齊缺口，只要把對應的海圖貼上文字丟給 Claude 就能持續擴充
+要補齊剩餘缺口（Sea-Pillar 基礎類型名稱、命運的保險箱是否正確），
+只要把對應的海圖貼上文字丟給 Claude 就能持續校正
 `src/data/mods.ts`、`src/data/strategies.ts`，不用改動其他程式邏輯。
 
 ## 專案結構

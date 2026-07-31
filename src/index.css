@@ -207,6 +207,22 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 }
 .remove-btn:hover { color: #e0897a; }
 
+.strategy-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.strategy-tab {
+  background: #0a120d;
+  border: 1px solid #1e2b21;
+  color: #b9c9be;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.strategy-tab:hover { border-color: #3d5142; }
+.strategy-tab.active { background: #0d1e22; border-color: #5bb0c9; color: #cfeaf2; font-weight: 600; }
+.strategy-tagline { font-size: 13px; color: #9db3a4; margin: 4px 0 10px; }
+.guide-list { list-style: disc; padding-left: 20px; margin: 0 0 14px; font-size: 13px; color: #b9c9be; line-height: 1.6; }
+.checklist-title { font-size: 12px; color: #6b8072; margin-bottom: 6px; }
+
 /* ---------------------------------------------------------------------- */
 .checklist { list-style: none; padding: 0; margin: 0; font-size: 14px; }
 .checklist li { margin-bottom: 6px; }

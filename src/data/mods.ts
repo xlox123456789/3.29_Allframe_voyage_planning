@@ -69,14 +69,14 @@ export const BORDER_MODS: BorderModDef[] = [
   { id: 'b-rare-conn-1', text: '相鄰區域每與一個區域相連，即增加 50% 稀有怪物數量', short: '每連接 +50% 稀有怪', effects: [], perConnEffects: [{ stat: 'rares', percent: 50 }] },
   { id: 'b-rare-conn-2', text: '相鄰區域每與一個區域相連，即增加 75% 稀有怪物數量', short: '每連接 +75% 稀有怪', effects: [], perConnEffects: [{ stat: 'rares', percent: 75 }] },
   {
-    id: 'b-quant-conn-1',
+    id: 'b-quantconn-1',
     text: '相鄰區域每與一個區域相連，即減少 50% 找到的物品數量\n增加 120% 相鄰區域找到的物品數量',
     short: '每連接 +120% 物品數量',
     effects: [{ stat: 'quantity', percent: 120 }],
     perConnEffects: [{ stat: 'quantity', percent: -50 }],
   },
   {
-    id: 'b-quant-conn-2',
+    id: 'b-quantconn-2',
     text: '相鄰區域每與一個區域相連，即減少 50% 找到的物品數量\n增加 180% 相鄰區域找到的物品數量',
     short: '每連接 +180% 物品數量',
     effects: [{ stat: 'quantity', percent: 180 }],
@@ -117,23 +117,119 @@ export const borderModById = new Map(BORDER_MODS.map((m) => [m.id, m]))
 
 // ---------------------------------------------------------------------------
 // 海圖固定詞綴（相鄰 adj- / 航程 voy-）
-// 目前只收錄實測貼上樣本中出現過的詞綴；其餘（星魚 star / 神憑附 pantheon /
-// 金燈籠 lantern / 強化寶箱 box / 附身 possess / 破裂 fracture 等）尚未取得
-// 真實中文字串，先留空位，解析器遇到未知固定詞綴時會保留原文（rawText/implicitText），
-// 不會遺失資料，之後補上文字即可自動生效。
+// 來源：玩家提供的完整「航程詞綴」清單（真實遊戲文字，含各階別數值），
+// 2026-08 全數更新為確認文字。少數效果數值（傷害/機率換算成的內部權重分數）
+// 是我自己抓的合理估值，不是遊戲原文的一部分，只影響求解器的排序不影響顯示文字。
 // ---------------------------------------------------------------------------
 export const VOYAGE_MODS: VoyageModDef[] = [
-  { id: 'adj-packsize-1', text: '相鄰區域內含有額外 17(16-20) 堆木桶', short: '木桶堆', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 15 }] },
-  { id: 'adj-magicboost-1', text: '怪物有機率受到 2000 個荒林妖精強化', short: '荒林妖精強化', scope: 'adjacent', effects: [{ stat: 'magicmonsters', percent: 20 }] },
-  { id: 'adj-unique-1', text: '相鄰區域內掉落的項鍊有 10% 機率改為掉落一條傳奇項鍊', short: '10% 項鍊變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 30 }] },
-  { id: 'voy-packsize-1', text: '增加 7% 航程中所有區域的怪物群大小', short: '航程 +7% 怪物群大小', scope: 'global', effects: [{ stat: 'packsize', percent: 7 }] },
-  { id: 'voy-rarity-1', text: '增加 7% 航程中所有區域找到的物品稀有度', short: '航程 +7% 物品稀有度', scope: 'global', effects: [{ stat: 'rarity', percent: 7 }] },
+  // --- 被禁錮的怪物 ---
+  { id: 'adj-captive-1', text: '相鄰區域內含有額外 (1—2) 名被禁錮的怪物', short: '+1-2 被禁錮怪物', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 10 }] },
+  { id: 'adj-captive-2', text: '相鄰區域內含有額外 (2—4) 名被禁錮的怪物', short: '+2-4 被禁錮怪物', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 18 }] },
+  { id: 'adj-captive-3', text: '相鄰區域內含有額外 5 名被禁錮的怪物', short: '+5 被禁錮怪物', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 25 }] },
 
-  // --- Divine Border Rares 還需要，但尚無真實文字（先放佔位，之後補文字即可） ---
-  // { id: 'adj-star-1', text: '???（星魚 giga-starfish 相關）', scope: 'adjacent', effects: [{ stat: 'rares', percent: 40 }] },
-  // { id: 'adj-box-1',  text: '???（相鄰區域含強化寶箱）', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
-  // { id: 'voy-possess-1', text: '???（Pantheon 附身相關）', scope: 'global', effects: [{ stat: 'rares', percent: 20 }] },
-  // { id: 'voy-fracture-1', text: '???（破裂 fracture 相關）', scope: 'global', effects: [{ stat: 'rares', percent: 20 }] },
+  // --- 一般保險箱（家族 box，Divine Border Rares 的 adjacent:box 用這個） ---
+  { id: 'adj-box-1', text: '相鄰區域內含有額外 1 個保險箱', short: '+1 保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 15 }] },
+  { id: 'adj-box-2', text: '相鄰區域內含有額外 (2—4) 個保險箱', short: '+2-4 保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 25 }] },
+  { id: 'adj-box-3', text: '相鄰區域內含有額外 5 個保險箱', short: '+5 保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 35 }] },
+
+  // --- 章魚 / 螃蟹（相鄰版，跟邊界版是不同池子） ---
+  { id: 'adj-octopus-1', text: '相鄰區域內含有額外(8—10)群章魚', short: '+8-10群 章魚', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 8 }] },
+  { id: 'adj-octopus-2', text: '相鄰區域內含有額外(11—14)群章魚', short: '+11-14群 章魚', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 12 }] },
+  { id: 'adj-crab-1', text: '相鄰區域內含有額外(8—10)群螃蟹', short: '+8-10群 螃蟹', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 8 }] },
+  { id: 'adj-crab-2', text: '相鄰區域內含有額外(11—14)群螃蟹', short: '+11-14群 螃蟹', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 12 }] },
+
+  // --- 魔法 / 稀有怪物數量（相鄰） ---
+  { id: 'adj-magic-1', text: '增加 30% 相鄰區域找到的魔法怪物數量', short: '+30% 魔法怪', scope: 'adjacent', effects: [{ stat: 'magicmonsters', percent: 30 }] },
+  { id: 'adj-magic-2', text: '增加 60% 相鄰區域找到的魔法怪物數量', short: '+60% 魔法怪', scope: 'adjacent', effects: [{ stat: 'magicmonsters', percent: 60 }] },
+  { id: 'adj-rare-1', text: '增加 30% 相鄰區域找到的稀有怪物數量', short: '+30% 稀有怪', scope: 'adjacent', effects: [{ stat: 'rares', percent: 30 }] },
+  { id: 'adj-rare-2', text: '增加 60% 相鄰區域找到的稀有怪物數量', short: '+60% 稀有怪', scope: 'adjacent', effects: [{ stat: 'rares', percent: 60 }] },
+
+  // --- 瓶中信（Message in a Bottle，Speedrun Strongboxes 用） ---
+  { id: 'adj-msg-1', text: '相鄰區域內含有額外 1 個瓶中信', short: '+1 瓶中信', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
+  { id: 'adj-msg-2', text: '相鄰區域內含有額外 2 個瓶中信', short: '+2 瓶中信', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 60 }] },
+
+  { id: 'adj-fish-1', text: '相鄰區域內含有高價且珍稀的魚類', short: '珍稀魚類', scope: 'adjacent', effects: [{ stat: 'currency', percent: 20 }] },
+
+  // --- 荒林妖精（Magic Ethereal 用） ---
+  { id: 'adj-wisps-1', text: '怪物有機率受到 2000 個荒林妖精強化', short: '2000 荒林妖精', scope: 'adjacent', effects: [{ stat: 'wisps', percent: 20 }] },
+  { id: 'adj-wisps-2', text: '怪物有機率受到 4000 個荒林妖精強化', short: '4000 荒林妖精', scope: 'adjacent', effects: [{ stat: 'wisps', percent: 40 }] },
+
+  { id: 'adj-azuri-1', text: '阿茲里之息', short: '阿茲里之息', scope: 'adjacent', effects: [{ stat: 'currency', percent: 25 }] },
+
+  // --- 裝備轉金幣（相鄰版） ---
+  { id: 'adj-gold-1', text: '相鄰區域內的怪物掉落的裝備有 40% 會改為掉落金幣', short: '40% 裝備轉金幣', scope: 'adjacent', effects: [{ stat: 'gold', percent: 40 }] },
+  { id: 'adj-gold-2', text: '相鄰區域內的怪物掉落的裝備有 80% 會改為掉落金幣', short: '80% 裝備轉金幣', scope: 'adjacent', effects: [{ stat: 'gold', percent: 80 }] },
+
+  { id: 'adj-prison-1', text: '相鄰區域內含有額外 1 個關滿罪魂的囚牢', short: '+1 罪魂囚牢', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 25 }] },
+  { id: 'adj-prison-2', text: '相鄰區域內含有額外 2 個關滿罪魂的囚牢', short: '+2 罪魂囚牢', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
+
+  // --- 命運的保險箱（🟡 對應 Diviner's Strongbox 的猜測，中信度） ---
+  { id: 'adj-divbox-1', text: '相鄰區域內含有額外 2 個命運的保險箱', short: '+2 命運保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 45 }] },
+  { id: 'adj-divbox-2', text: '相鄰區域內含有額外 3 個命運的保險箱', short: '+3 命運保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 60 }] },
+
+  { id: 'adj-arcanistbox-1', text: '相鄰區域內含有額外 2 個奧術師的保險箱', short: '+2 奧術師保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 45 }] },
+  { id: 'adj-arcanistbox-2', text: '相鄰區域內含有額外 3 個奧術師的保險箱', short: '+3 奧術師保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 60 }] },
+
+  // --- 特工的保險箱（Operative's Strongbox，Speedrun Strongboxes 主力） ---
+  { id: 'adj-opbox-1', text: '相鄰區域內含有額外 2 個特工的保險箱', short: '+2 特工保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 55 }] },
+  { id: 'adj-opbox-2', text: '相鄰區域內含有額外 3 個特工的保險箱', short: '+3 特工保險箱', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 70 }] },
+
+  // --- 木桶堆 ---
+  { id: 'adj-barrels-1', text: '相鄰區域內含有額外 (12—15) 堆木桶', short: '木桶堆 12-15', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 12 }] },
+  { id: 'adj-barrels-2', text: '相鄰區域內含有額外 (16—20) 堆木桶', short: '木桶堆 16-20', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 18 }] },
+
+  // --- 巨大海星（星魚，Meatfish / Divine Border Rares 用） ---
+  { id: 'adj-star-1', text: '相鄰區域內含有額外(4—5)群巨大海星', short: '+4-5群 巨大海星', scope: 'adjacent', effects: [{ stat: 'rares', percent: 40 }] },
+  { id: 'adj-star-2', text: '相鄰區域內含有額外(6—7)群巨大海星', short: '+6-7群 巨大海星', scope: 'adjacent', effects: [{ stat: 'rares', percent: 55 }] },
+
+  { id: 'adj-itemfracture-1', text: '相鄰區域內掉落的物品有 2% 機率為破裂物品', short: '2% 物品破裂', scope: 'adjacent', effects: [{ stat: 'currency', percent: 15 }] },
+
+  // --- 黃金燈籠 ---
+  { id: 'adj-lantern-1', text: '相鄰區域內含有額外 4 個黃金燈籠', short: '+4 黃金燈籠', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
+
+  // --- 眾神殿詞綴（神憑附，Meatfish 用） ---
+  { id: 'adj-pantheon-1', text: '相鄰區域內的稀有怪物擁有一條眾神殿詞綴', short: '稀有怪+眾神殿詞綴', scope: 'adjacent', effects: [{ stat: 'rares', percent: 45 }] },
+
+  // --- 傳奇裝備掉落機率（戒指 / 項鍊 / 腰帶） ---
+  { id: 'adj-uniquering-1', text: '相鄰區域內掉落的戒指有 10% 機率改為掉落一個傳奇戒指', short: '10% 戒指變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 30 }] },
+  { id: 'adj-uniquering-2', text: '相鄰區域內掉落的戒指有 20% 機率改為掉落一個傳奇戒指', short: '20% 戒指變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 50 }] },
+  { id: 'adj-uniqueneck-1', text: '相鄰區域內掉落的項鍊有 10% 機率改為掉落一條傳奇項鍊', short: '10% 項鍊變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 30 }] },
+  { id: 'adj-uniqueneck-2', text: '相鄰區域內掉落的項鍊有 20% 機率改為掉落一條傳奇項鍊', short: '20% 項鍊變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 50 }] },
+  { id: 'adj-uniquebelt-1', text: '相鄰區域內掉落的腰帶有 10% 機率改為掉落一條傳奇腰帶', short: '10% 腰帶變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 30 }] },
+  { id: 'adj-uniquebelt-2', text: '相鄰區域內掉落的腰帶有 20% 機率改為掉落一條傳奇腰帶', short: '20% 腰帶變傳奇', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 50 }] },
+
+  { id: 'adj-jellyfish-1', text: '相鄰區域內含有一隻友善的水母', short: '友善的水母', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 5 }] },
+
+  // ===========================================================================
+  // 航程（global scope，效果作用於整趟航程的所有區域）
+  // ===========================================================================
+  { id: 'voy-souleater-1', text: '玩家在航程中所有區域時擁有噬魂者', short: '航程 噬魂者', scope: 'global', effects: [{ stat: 'treasure', percent: 10 }] },
+
+  { id: 'voy-packsize-1', text: '增加 5% 航程中所有區域的怪物群大小', short: '航程 +5% 怪物群大小', scope: 'global', effects: [{ stat: 'packsize', percent: 5 }] },
+  { id: 'voy-packsize-2', text: '增加 7% 航程中所有區域的怪物群大小', short: '航程 +7% 怪物群大小', scope: 'global', effects: [{ stat: 'packsize', percent: 7 }] },
+
+  { id: 'voy-quant-1', text: '增加 8% 航程中所有區域找到的物品數量', short: '航程 +8% 物品數量', scope: 'global', effects: [{ stat: 'quantity', percent: 8 }] },
+  { id: 'voy-quant-2', text: '增加 10% 航程中所有區域找到的物品數量', short: '航程 +10% 物品數量', scope: 'global', effects: [{ stat: 'quantity', percent: 10 }] },
+
+  { id: 'voy-rarity-1', text: '增加 7% 航程中所有區域找到的物品稀有度', short: '航程 +7% 物品稀有度', scope: 'global', effects: [{ stat: 'rarity', percent: 7 }] },
+  { id: 'voy-rarity-2', text: '增加 9% 航程中所有區域找到的物品稀有度', short: '航程 +9% 物品稀有度', scope: 'global', effects: [{ stat: 'rarity', percent: 9 }] },
+
+  { id: 'voy-sulph-1', text: '增加 15% 航程中所有區域內找到的亡者硫酸', short: '航程 +15% 亡者硫酸', scope: 'global', effects: [{ stat: 'sulphur', percent: 15 }] },
+  { id: 'voy-sulph-2', text: '增加 20% 航程中所有區域內找到的亡者硫酸', short: '航程 +20% 亡者硫酸', scope: 'global', effects: [{ stat: 'sulphur', percent: 20 }] },
+  { id: 'voy-sulph-3', text: '增加 25% 航程中所有區域內找到的亡者硫酸', short: '航程 +25% 亡者硫酸', scope: 'global', effects: [{ stat: 'sulphur', percent: 25 }] },
+
+  { id: 'voy-rare-1', text: '增加 25% 航程中所有區域找到的稀有怪物數量', short: '航程 +25% 稀有怪', scope: 'global', effects: [{ stat: 'rares', percent: 25 }] },
+  { id: 'voy-magic-1', text: '增加 25% 航程中所有區域找到的魔法怪物數量', short: '航程 +25% 魔法怪', scope: 'global', effects: [{ stat: 'magicmonsters', percent: 25 }] },
+
+  { id: 'voy-noequip-1', text: '怪物無法掉落裝備、藥劑、或萃取物', short: '怪物不掉裝備/藥劑', scope: 'global', effects: [{ stat: 'currency', percent: 30 }] },
+  { id: 'voy-minmagic-1', text: '航程中所有區域的所有怪物為魔法', short: '航程怪物全為魔法', scope: 'global', effects: [{ stat: 'magicmonsters', percent: 100 }] },
+
+  // --- 附身 / 破裂（Meatfish / Divine Border Rares 核心） ---
+  { id: 'voy-possess-1', text: '航程中所有區域的稀有怪物有 100% 機率被附身', short: '稀有怪 100% 被附身', scope: 'global', effects: [{ stat: 'rares', percent: 60 }] },
+  { id: 'voy-essence-1', text: '航程中所有區域的原生稀有怪物受到精髓囚禁', short: '原生稀有怪受精髓囚禁', scope: 'global', effects: [{ stat: 'rares', percent: 30 }] },
+  { id: 'voy-fracture-1', text: '航程內的稀有怪物有 50% 機率於死亡時散裂', short: '稀有怪 50% 死亡散裂', scope: 'global', effects: [{ stat: 'rares', percent: 45 }] },
+
+  { id: 'voy-flaskquality-1', text: '航程中所有區域內找到的藥劑有 100% 機率擁有 20% 品質', short: '藥劑 100% 20%品質', scope: 'global', effects: [{ stat: 'currency', percent: 10 }] },
 ]
 
 export const voyageModById = new Map(VOYAGE_MODS.map((m) => [m.id, m]))

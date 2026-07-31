@@ -4,10 +4,8 @@ import { emptyBorders } from './types'
 import { parseChartText } from './logic/parser'
 import { solve, type SolverResult } from './logic/solver'
 import { BORDER_MODS, borderModById } from './data/mods'
-import { STRATEGIES } from './data/strategies'
+import { STRATEGIES, type StrategyDef, type StrategyRequirement } from './data/strategies'
 import './index.css'
-
-const STRATEGY = STRATEGIES[0] // MVP：目前只做 Divine Border Rares
 
 // 12 段邊界，每段對應九宮格外圍固定的一格：上排/下排各對齊 3 個直欄，
 // 左排/右排各對齊 3 個橫列。segment 索引沿用 types.ts 的 borderTouches。
@@ -278,27 +276,66 @@ function ChartLibrary({
   )
 }
 
+// ---------------------------------------------------------------------------
+// 策略選擇器
+// ---------------------------------------------------------------------------
+function StrategyPicker({
+  selected,
+  onSelect,
+}: {
+  selected: StrategyDef
+  onSelect: (s: StrategyDef) => void
+}) {
+  return (
+    <div className="strategy-picker">
+      {STRATEGIES.map((s) => (
+        <button
+          key={s.id}
+          className={`strategy-tab ${s.id === selected.id ? 'active' : ''}`}
+          onClick={() => onSelect(s)}
+        >
+          {s.name}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean {
+  const count = charts.filter(
+    (c) =>
+      (req.modIds && c.modIds.some((id) => req.modIds!.includes(id))) ||
+      (req.nameMatch && c.name.toLowerCase().includes(req.nameMatch.toLowerCase())),
+  ).length
+  return count >= req.count
+}
+
+// ---------------------------------------------------------------------------
+// App
+// ---------------------------------------------------------------------------
 export default function App() {
   const [charts, setCharts] = useState<ChartData[]>([])
   const [borders, setBorders] = useState<Borders>(emptyBorders())
   const [result, setResult] = useState<SolverResult | null>(null)
   const [running, setRunning] = useState(false)
+  const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
 
-  const hasDivineBorder = borders.includes('b-divine')
-  const hasPillarChart = charts.some((c) => c.name.includes('柱'))
+  const borderOk = !strategy.requiresBorderId || borders.includes(strategy.requiresBorderId.id)
+  const reqStates = (strategy.requirements ?? []).map((r) => ({ req: r, ok: requirementMet(r, charts) }))
+  const allOk = borderOk && reqStates.every((r) => r.ok)
 
   function runSolver() {
     setRunning(true)
     setTimeout(() => {
-      const results = solve(charts, borders, STRATEGY.weights, {
+      const results = solve(charts, borders, strategy.weights, {
         mode: 'connected',
         allowRotation: true,
         adjacencyMode: 'physical',
         adjacentAffectsSelf: false,
         topK: 1,
-        strategyRules: STRATEGY.rules,
+        strategyRules: strategy.rules,
       })
       setResult(results[0] ?? null)
       setRunning(false)
@@ -309,13 +346,10 @@ export default function App() {
     <div className="app">
       <header>
         <div className="eyebrow">PATH OF EXILE · 深海全焰之咒</div>
-        <h1>航海圖規劃器</h1>
+        <h1>亡焰咒海</h1>
         <p className="subtitle">
-          設定 12 段外框邊界詞綴，貼上你的海圖倉庫，按「開始規劃」自動選出最佳九張並排出擺放方式。
+          設定 12 段外框邊界詞綴，貼上你的海圖倉庫，選擇策略後按「開始規劃」自動選出最佳九張並排出擺放方式。
         </p>
-        <div className="strategy-badge">
-          目前策略：<strong>{STRATEGY.name}</strong>
-        </div>
       </header>
 
       <div className="main-grid">
@@ -347,16 +381,33 @@ export default function App() {
       </div>
 
       <section className="panel">
-        <h2>③ 策略需求檢查</h2>
-        <ul className="checklist">
-          <li className={hasDivineBorder ? 'ok' : 'bad'}>
-            {hasDivineBorder ? '✅' : '❌'} 已擲出神聖邊界（稀有怪掉神聖石）
-          </li>
-          <li className={hasPillarChart ? 'ok' : 'bad'}>
-            {hasPillarChart ? '✅' : '❌'} 倉庫內有 Sea-Pillar 類型圖表（名稱含「柱」）
-          </li>
+        <h2>③ 選擇策略</h2>
+        <StrategyPicker selected={strategy} onSelect={setStrategy} />
+        <p className="strategy-tagline">{strategy.tagline}</p>
+        <ul className="guide-list">
+          {strategy.guide.map((g, i) => (
+            <li key={i}>{g}</li>
+          ))}
         </ul>
-        {(!hasDivineBorder || !hasPillarChart) && <div className="hint">{STRATEGY.waitHint}</div>}
+
+        {(strategy.requiresBorderId || reqStates.length > 0) && (
+          <>
+            <div className="checklist-title">需求檢查</div>
+            <ul className="checklist">
+              {strategy.requiresBorderId && (
+                <li className={borderOk ? 'ok' : 'bad'}>
+                  {borderOk ? '✅' : '❌'} 已擲出{strategy.requiresBorderId.label}
+                </li>
+              )}
+              {reqStates.map(({ req, ok }, i) => (
+                <li key={i} className={ok ? 'ok' : 'bad'}>
+                  {ok ? '✅' : '❌'} {req.label}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {!allOk && strategy.waitHint && <div className="hint">{strategy.waitHint}</div>}
       </section>
 
       <section className="panel">

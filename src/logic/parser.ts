@@ -79,8 +79,16 @@ function similarity(a: string, b: string): number {
   return overlap / Math.min(A.size, B.size)
 }
 
-/** 把一行固定詞綴文字比對到已知的 VOYAGE_MODS，回傳最相似的 id（門檻以上才算） */
+/** 把一行固定詞綴文字比對到已知的 VOYAGE_MODS。
+ *  優先做「精確文字比對」（遊戲文字是固定模板套數值，本來就該一字不差），
+ *  只有在完全找不到精確符合時，才退回模糊比對（字元 bigram 相似度）當作備援，
+ *  這樣才不會把同一模板、不同階別（例如 4-5 群跟 6-7 群）互相比對錯誤。 */
 function matchImplicit(line: string): string | null {
+  const exactTarget = line.trim().replace(/\s+/g, '')
+  for (const m of VOYAGE_MODS) {
+    if (m.text.trim().replace(/\s+/g, '') === exactTarget) return m.id
+  }
+
   const target = cleanForMatch(line)
   if (!target) return null
   let best: { id: string; score: number } | null = null
@@ -132,7 +140,7 @@ export function parseChartText(text: string): ParseResult {
     const rarity = lines[rarityIdx]?.replace('稀有度:', '').trim()
 
     // 未測繪（固定詞綴尚未揭露）先擋掉，避免資料不完整誤算
-    if (/尚未測繪|測繪後將揭露/.test(item)) {
+    if (/尚未測繪|測繪後將揭露|航程詞綴會於測繪後揭露/.test(item)) {
       rejected.push({ name, reason: '尚未測繪（固定詞綴未揭露），先出航一次再貼上' })
       continue
     }
