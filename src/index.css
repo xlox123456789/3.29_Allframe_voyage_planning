@@ -5,7 +5,12 @@ body {
   background: #0a100c;
   color: #dfe8e0;
 }
-.app { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+.app {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 28px clamp(16px, 2.5vw, 48px) 80px;
+}
 
 header { margin-bottom: 22px; }
 .header-top { display: flex; align-items: center; justify-content: space-between; }
@@ -27,12 +32,12 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 
 .main-grid {
   display: grid;
-  grid-template-columns: 640px 420px;
-  gap: 16px;
+  grid-template-columns: minmax(620px, 3fr) minmax(420px, 2fr);
+  gap: 20px;
   align-items: start;
-  justify-content: start;
+  width: 100%;
 }
-@media (max-width: 1100px) {
+@media (max-width: 1180px) {
   .main-grid { grid-template-columns: 1fr; }
   .main-grid .panel { width: 100%; }
 }
@@ -54,6 +59,7 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 }
 .panel-sub { font-size: 12px; color: #5f7466; font-weight: normal; }
 .board-panel { overflow-x: auto; }
+.board-panel .voyage-board { margin-inline: auto; }
 
 /* ---------------------------------------------------------------------- */
 /* 九宮格 + 對齊邊界（5x5 grid：外圈是邊界，中間 3x3 是海圖格） */
