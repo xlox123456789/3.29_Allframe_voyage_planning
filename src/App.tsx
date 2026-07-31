@@ -334,8 +334,10 @@ export default function App() {
   const [borders, setBorders] = useState<Borders>(emptyBorders())
   const [result, setResult] = useState<SolverResult | null>(null)
   const [running, setRunning] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
   const [lang, setLang] = useState<'zh' | 'en'>('zh')
+  const progressTimer = useRef<number | null>(null)
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
 
@@ -345,6 +347,15 @@ export default function App() {
 
   function runSolver() {
     setRunning(true)
+    setProgress(0)
+
+    // 假進度條：實際求解通常很快，這裡用計時器模擬逐步推進的視覺效果，
+    // 卡在 92% 附近等真正算完才跳到 100%，讓使用者知道「還在跑」。
+    if (progressTimer.current) window.clearInterval(progressTimer.current)
+    progressTimer.current = window.setInterval(() => {
+      setProgress((p) => (p >= 92 ? 92 : p + Math.max(1, (92 - p) * 0.15)))
+    }, 120)
+
     setTimeout(() => {
       const results = solve(charts, borders, strategy.weights, {
         mode: 'connected',
@@ -355,7 +366,12 @@ export default function App() {
         strategyRules: strategy.rules,
       })
       setResult(results[0] ?? null)
-      setRunning(false)
+      if (progressTimer.current) window.clearInterval(progressTimer.current)
+      setProgress(100)
+      setTimeout(() => {
+        setRunning(false)
+        setProgress(0)
+      }, 350)
     }, 10)
   }
 
@@ -443,7 +459,15 @@ export default function App() {
         <button className="solve-btn" disabled={charts.length === 0 || running} onClick={runSolver}>
           {running ? '規劃中…' : '開始規劃'}
         </button>
-        {result && (
+        {running && (
+          <div className="progress-wrap">
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="progress-pct">{Math.round(progress)}%</div>
+          </div>
+        )}
+        {!running && result && (
           <div className="result-meta">
             分數：{result.reward.toFixed(1)}　{result.valid ? '✅ 航道可行' : '⚠️ 航道有問題（接口未接上或有格子空白）'}
           </div>

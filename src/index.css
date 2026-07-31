@@ -257,4 +257,8 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 }
 .solve-btn:hover:not(:disabled) { background: #74c0d6; }
 .solve-btn:disabled { background: #1e2b21; color: #4a5c50; cursor: not-allowed; }
+.progress-wrap { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.progress-bar { flex: 1; height: 8px; border-radius: 999px; background: #1e2b21; overflow: hidden; }
+.progress-fill { height: 100%; background: #5bb0c9; border-radius: 999px; transition: width 0.15s ease-out; }
+.progress-pct { font-size: 12px; color: #7f9587; min-width: 34px; text-align: right; }
 .result-meta { margin-top: 10px; font-size: 14px; color: #dfe8e0; }
