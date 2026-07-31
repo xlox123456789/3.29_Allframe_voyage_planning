@@ -5,9 +5,8 @@
 //   - one-more-map/one-more-map.github.io（原站策略邏輯）
 //   - Milkybk_ 的策略試算表（YouTube《Curse of the Allflame Buffs and My Strategy》
 //     https://www.youtube.com/watch?v=E6GMu9Z5j5U 的隨附試算表）
-// 部分海圖固定詞綴的中文原文仍是合理猜測（例如「命運的保險箱」對應 Diviner's
-// Strongbox、Sea-Pillar 的基礎類型名稱），標註於 data/mods.ts 與各策略的 waitHint，
-// 其餘皆已是實測確認的真實遊戲文字。
+// 所有海圖固定詞綴（相鄰/航程）已對照玩家提供的完整英文清單校正過，
+// Sea-Pillar（區域名稱「海洋之柱」）、命運的保險箱＝Diviner's Strongbox 均已確認。
 
 import type { Edges, Stat, Weights } from '../types'
 
@@ -51,8 +50,8 @@ const CORNERS = [0, 2, 6, 8]
 const TOP_BOTTOM_MID = [1, 7]
 const RIGHT_MID = 5
 
-// ⚠️ 「Sea Pillar」是海圖的「基礎類型」名稱（跟你貼過的「沙質海床海圖」同一類東西），
-// 目前還沒取得中文版基礎類型名稱的實測樣本，先用「柱」暫時比對。
+// ✅ 確認：「Sea Pillars」= 區域名稱「海洋之柱」（不是海圖本身的花名），
+// 判斷邏輯已經改成同時比對 chart.name 與 chart.areaName。
 const NAME_MATCH_PILLAR = '柱'
 
 export const STRATEGIES: StrategyDef[] = [
@@ -94,7 +93,6 @@ export const STRATEGIES: StrategyDef[] = [
         label: '任一寶箱系圖表 × 1（放中心用）',
       },
     ],
-    waitHint: '「命運的保險箱」是否真的對應 Diviner\'s Strongbox 還沒 100% 確認，如果之後發現對不上，貼實測圖表給我校正即可。',
   },
 
   // -------------------------------------------------------------------------
@@ -129,7 +127,6 @@ export const STRATEGIES: StrategyDef[] = [
       { modIds: ['adj-pantheon-1'], count: 1, label: '神憑附（Pantheon Touched）圖表 × 1' },
       { nameMatch: NAME_MATCH_PILLAR, count: 2, label: 'Sea-Pillar 類型圖表 × 2' },
     ],
-    waitHint: 'Sea-Pillar 的基礎類型中文名稱還沒確認，目前用「名稱含『柱』」暫代，其餘（星魚/神憑附/金燈籠）都已經是確認過的真實文字。',
   },
 
   // -------------------------------------------------------------------------
@@ -187,7 +184,7 @@ export const STRATEGIES: StrategyDef[] = [
     ],
     requirements: [{ nameMatch: NAME_MATCH_PILLAR, count: 1, label: 'Sea-Pillar 類型圖表 × 1' }],
     requiresBorderId: { id: 'b-divine', label: '神聖邊界（稀有怪掉神聖石）' },
-    waitHint: '沒有神聖邊界時，建議先用別的策略跑一般海圖，等重擲到神聖邊界再切回這個策略。Sea-Pillar 的基礎類型中文名稱還沒確認，目前用「名稱含『柱』」暫代。',
+    waitHint: '沒有神聖邊界時，建議先用別的策略跑一般海圖，等重擲到神聖邊界再切回這個策略。',
   },
 ]
 

@@ -118,6 +118,8 @@ export interface ModEffect {
 export interface VoyageModDef {
   id: string
   text: string
+  /** English original wording (for English-client players pasting English item text) */
+  textEn?: string
   /** compact label for count-based mods where the scored percent is only a heuristic */
   short?: string
   scope: Scope
@@ -130,6 +132,8 @@ export interface VoyageModDef {
 export interface BorderModDef {
   id: string
   text: string
+  /** English original wording */
+  textEn?: string
   /** compact display label for the border pill */
   short?: string
   effects: ModEffect[]
@@ -154,6 +158,9 @@ export interface ChartData {
   implicitText?: string
   /** the chart's own area reward stats, read from the item header (self-scope) */
   rewards?: ModEffect[]
+  /** area name (e.g. "深海平原" / "海洋之柱"／Sea Pillars) — this is what determines
+   *  special area types like Sea-Pillar, NOT the chart's flavor name */
+  areaName?: string
   /** chart connector shape name from the item text (Straight/Corner/Junction/End) */
   shape?: string
   /** unparsed mod lines kept from import so nothing is silently lost */

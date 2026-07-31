@@ -21,15 +21,18 @@ function BorderPicker({
   value,
   onChange,
   align,
+  lang,
 }: {
   value: string | null
   onChange: (v: string | null) => void
   align: 'top' | 'bottom' | 'left' | 'right'
+  lang: 'zh' | 'en'
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
   const mod = value ? borderModById.get(value) : null
+  const labelOf = (m: (typeof BORDER_MODS)[number]) => (lang === 'en' ? m.textEn ?? m.text : m.text)
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -40,10 +43,10 @@ function BorderPicker({
   }, [])
 
   const filtered = useMemo(() => {
-    const q = query.trim()
+    const q = query.trim().toLowerCase()
     if (!q) return BORDER_MODS
-    return BORDER_MODS.filter((m) => m.text.includes(q) || m.short?.includes(q))
-  }, [query])
+    return BORDER_MODS.filter((m) => labelOf(m).toLowerCase().includes(q) || m.short?.includes(query.trim()))
+  }, [query, lang])
 
   return (
     <div className={`border-picker align-${align}`} ref={rootRef}>
@@ -54,16 +57,16 @@ function BorderPicker({
           setOpen((o) => !o)
           setQuery('')
         }}
-        title={mod?.text ?? '點擊設定這段邊界'}
+        title={mod ? labelOf(mod) : lang === 'en' ? 'Click to set this border' : '點擊設定這段邊界'}
       >
-        {mod?.short ?? '未擲出'}
+        {mod ? (lang === 'en' ? mod.textEn ?? mod.short ?? mod.text : mod.short ?? mod.text) : lang === 'en' ? 'Not rolled' : '未擲出'}
       </button>
       {open && (
         <div className="border-dropdown">
           <input
             autoFocus
             className="border-search"
-            placeholder="輸入關鍵字快速搜尋…"
+            placeholder={lang === 'en' ? 'Type to search…' : '輸入關鍵字快速搜尋…'}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -75,7 +78,7 @@ function BorderPicker({
                 setOpen(false)
               }}
             >
-              （清空 / 未擲出）
+              {lang === 'en' ? '(clear / not rolled)' : '（清空 / 未擲出）'}
             </div>
             {filtered.map((m) => (
               <div
@@ -86,10 +89,12 @@ function BorderPicker({
                   setOpen(false)
                 }}
               >
-                {m.text}
+                {labelOf(m)}
               </div>
             ))}
-            {filtered.length === 0 && <div className="border-option empty">找不到符合的邊界詞綴</div>}
+            {filtered.length === 0 && (
+              <div className="border-option empty">{lang === 'en' ? 'No matching border mod' : '找不到符合的邊界詞綴'}</div>
+            )}
           </div>
         </div>
       )}
@@ -122,11 +127,13 @@ function VoyageBoard({
   onBorderChange,
   board,
   charts,
+  lang,
 }: {
   borders: Borders
   onBorderChange: (seg: number, v: string | null) => void
   board: Board | null
   charts: Map<string, ChartData>
+  lang: 'zh' | 'en'
 }) {
   const cell = (col: number, row: number, node: React.ReactNode, key: string) => (
     <div key={key} style={{ gridColumn: col, gridRow: row }} className="grid-slot">
@@ -140,7 +147,7 @@ function VoyageBoard({
       cell(
         i + 2,
         1,
-        <BorderPicker align="top" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        <BorderPicker align="top" lang={lang} value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
         `t${seg}`,
       ),
     ),
@@ -150,7 +157,7 @@ function VoyageBoard({
       cell(
         i + 2,
         5,
-        <BorderPicker align="bottom" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        <BorderPicker align="bottom" lang={lang} value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
         `b${seg}`,
       ),
     ),
@@ -160,7 +167,7 @@ function VoyageBoard({
       cell(
         1,
         i + 2,
-        <BorderPicker align="left" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        <BorderPicker align="left" lang={lang} value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
         `l${seg}`,
       ),
     ),
@@ -170,7 +177,7 @@ function VoyageBoard({
       cell(
         5,
         i + 2,
-        <BorderPicker align="right" value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
+        <BorderPicker align="right" lang={lang} value={borders[seg]} onChange={(v) => onBorderChange(seg, v)} />,
         `r${seg}`,
       ),
     ),
@@ -213,11 +220,13 @@ function ChartLibrary({
   onImport,
   onRemove,
   onClear,
+  lang,
 }: {
   charts: ChartData[]
   onImport: (charts: ChartData[]) => void
   onRemove: (uid: string) => void
   onClear: () => void
+  lang: 'zh' | 'en'
 }) {
   const [text, setText] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
@@ -232,7 +241,11 @@ function ChartLibrary({
         </button>
       </div>
       <textarea
-        placeholder="Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製），可一次貼多張"
+        placeholder={
+          lang === 'en'
+            ? 'Ctrl+V paste a Chart (Ctrl+C in-game). You can paste several at once.'
+            : 'Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製），可一次貼多張'
+        }
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={6}
@@ -305,7 +318,9 @@ function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean 
   const count = charts.filter(
     (c) =>
       (req.modIds && c.modIds.some((id) => req.modIds!.includes(id))) ||
-      (req.nameMatch && c.name.toLowerCase().includes(req.nameMatch.toLowerCase())),
+      (req.nameMatch &&
+        (c.name.toLowerCase().includes(req.nameMatch.toLowerCase()) ||
+          c.areaName?.toLowerCase().includes(req.nameMatch.toLowerCase()))),
   ).length
   return count >= req.count
 }
@@ -319,6 +334,7 @@ export default function App() {
   const [result, setResult] = useState<SolverResult | null>(null)
   const [running, setRunning] = useState(false)
   const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
+  const [lang, setLang] = useState<'zh' | 'en'>('zh')
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
 
@@ -345,7 +361,17 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <div className="eyebrow">PATH OF EXILE · 深海全焰之咒</div>
+        <div className="header-top">
+          <div className="eyebrow">PATH OF EXILE · 深海全焰之咒</div>
+          <div className="lang-toggle">
+            <button className={lang === 'zh' ? 'active' : ''} onClick={() => setLang('zh')}>
+              中
+            </button>
+            <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>
+              EN
+            </button>
+          </div>
+        </div>
         <h1>亡焰咒海</h1>
         <p className="subtitle">
           設定 12 段外框邊界詞綴，貼上你的海圖倉庫，選擇策略後按「開始規劃」自動選出最佳九張並排出擺放方式。
@@ -366,6 +392,7 @@ export default function App() {
             }}
             board={result?.board ?? null}
             charts={chartMap}
+            lang={lang}
           />
         </section>
 
@@ -376,6 +403,7 @@ export default function App() {
             onImport={(cs) => setCharts((prev) => [...prev, ...cs])}
             onRemove={(uid) => setCharts((prev) => prev.filter((c) => c.uid !== uid))}
             onClear={() => setCharts([])}
+            lang={lang}
           />
         </section>
       </div>

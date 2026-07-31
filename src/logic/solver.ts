@@ -75,7 +75,11 @@ function resolveRuleCells(rule: PositionRule, borders: Borders): number[] {
 /** does this chart satisfy the rule's mod/name matcher? */
 function chartMatchesRule(chart: ChartData, rule: PositionRule): boolean {
   if (rule.modIds && chart.modIds.some((id) => rule.modIds!.includes(id))) return true
-  if (rule.nameMatch && chart.name.toLowerCase().includes(rule.nameMatch.toLowerCase())) return true
+  if (rule.nameMatch) {
+    const needle = rule.nameMatch.toLowerCase()
+    if (chart.name.toLowerCase().includes(needle)) return true
+    if (chart.areaName?.toLowerCase().includes(needle)) return true
+  }
   return false
 }
 
