@@ -58,11 +58,11 @@ export const STRATEGIES: StrategyDef[] = [
   // -------------------------------------------------------------------------
   {
     id: 'speedrun-strongboxes',
-    name: 'Speedrun Strongboxes（速刷強化寶箱）',
-    tagline: '把一張寶箱系圖表釘在中心，旁邊塞滿高數量圖表，衝一輪就走。',
+    name: 'Speedrun Strongboxes（速刷保險箱）',
+    tagline: '把一張保險箱海圖釘在中心，旁邊塞滿高數量海圖，衝一輪就走。',
     guide: [
-      '中心格優先放「Operative\'s 強化寶箱」相關圖表，沒有的話退而求其次放「Diviner\'s」或「Message in a Bottle」類型。',
-      '中心格以外如果放了寶箱系圖表反而會扣分——這類圖表要集中在中心才划算。',
+      '中心格優先放「技工保險箱」海圖，沒有的話退而求其次放「命運保險箱」或「瓶中信」海圖。',
+      '中心格以外如果放了保險箱海圖反而會扣分——這類海圖要集中在中心才划算。',
       '其餘格子盡量放「物品數量」較高的圖表，並留意邊界是否擲到神聖石／崇高石／古變石相關詞綴，能大幅提升單趟收益。',
       '目標是快速把 9 張圖跑完，不追求極致收益，講究翻頁速度。',
     ],
@@ -90,7 +90,7 @@ export const STRATEGIES: StrategyDef[] = [
       {
         modIds: ['adj-opbox-1', 'adj-opbox-2', 'adj-divbox-1', 'adj-divbox-2', 'adj-msg-1', 'adj-msg-2'],
         count: 1,
-        label: '任一寶箱系圖表 × 1（放中心用）',
+        label: '任一保險箱海圖 × 1（放中心用）',
       },
     ],
   },
@@ -98,13 +98,13 @@ export const STRATEGIES: StrategyDef[] = [
   // -------------------------------------------------------------------------
   {
     id: 'meatfish',
-    name: 'Meatfish（巨怪暗金流）',
-    tagline: '集中星魚、神憑附、金燈籠與 Sea-Pillar，堆出被神憑附的巨型稀有怪，拚暗金掉落。',
+    name: 'Meatfish（稀有怪傳說裝掉落特化）',
+    tagline: '集中巨大海星、附身怪、金燈籠與海洋之柱，堆出被附身的巨型稀有怪，拚傳說裝掉落。',
     guide: [
-      '星魚（Giant Starfish）圖表放上/下中央格，神憑附（Pantheon Touched）圖表放右中央格。',
+      '巨大海星海圖放上／下中央格，附身怪海圖放右中央格。',
       '金燈籠圖表優先放中心，收集越多燈籠 = 越多數量與稀有度加成。',
-      'Sea-Pillar 類型圖表放四個角落。',
-      '這套很吃資源、風險也高（容易被巨怪反殺，俗稱 very rippy），收穫是成堆的稀有怪掉落與 Mageblood / Headhunter 級別的暗金機會。',
+      '海洋之柱海圖放四個角落。',
+      '這套很吃資源、風險也高（容易被巨怪反殺，俗稱 very rippy），收穫是成堆的稀有怪掉落與 Mageblood / Headhunter 級別的傳說裝機會。',
     ],
     weights: {
       'adjacent:star': 10,
@@ -123,9 +123,9 @@ export const STRATEGIES: StrategyDef[] = [
       { cells: CORNERS, nameMatch: NAME_MATCH_PILLAR, bonus: 40 },
     ],
     requirements: [
-      { modIds: ['adj-star-1', 'adj-star-2'], count: 2, label: '星魚（Giant Starfish）圖表 × 2' },
-      { modIds: ['adj-pantheon-1'], count: 1, label: '神憑附（Pantheon Touched）圖表 × 1' },
-      { nameMatch: NAME_MATCH_PILLAR, count: 2, label: 'Sea-Pillar 類型圖表 × 2' },
+      { modIds: ['adj-star-1', 'adj-star-2'], count: 2, label: '巨大海星海圖 × 2' },
+      { modIds: ['adj-pantheon-1'], count: 1, label: '附身怪海圖 × 1' },
+      { nameMatch: NAME_MATCH_PILLAR, count: 2, label: '海洋之柱海圖 × 2' },
     ],
   },
 
@@ -159,13 +159,13 @@ export const STRATEGIES: StrategyDef[] = [
   // -------------------------------------------------------------------------
   {
     id: 'divine-border-rares',
-    name: 'Divine Border Rares（神聖邊界稀有怪）',
-    tagline: '擲出神聖邊界，把 Sea-Pillar 圖表釘在那一格，讓整格淹沒在稀有怪中——每隻稀有怪都會掉神聖石。',
+    name: 'Divine Border Rares（稀有怪神聖雨）',
+    tagline: '擲出神聖邊界，把海洋之柱海圖釘在那一格，讓整格淹沒在稀有怪中——每隻稀有怪都會掉神聖石。',
     guide: [
       '先在左邊「外框邊界詞綴」把 12 段邊界擲出來，只要有一段是「相鄰區域內的稀有怪物掉落額外 1 個神聖石」（神聖邊界）就能觸發此策略。',
-      '求解器會自動把倉庫裡名稱含「柱」（Sea-Pillar 類型）的圖表，優先放在神聖邊界貼著的那一格。',
+      '求解器會自動把倉庫裡名稱含「柱」的海洋之柱海圖，優先放在神聖邊界貼著的那一格。',
       '接著求解器會把「稀有怪物數量」相關的圖表盡量集中在同一格與其相鄰格，最大化神聖石產出。',
-      '沒有神聖邊界、或倉庫裡沒有 Sea-Pillar 類型圖表時，這個策略效果會大打折扣，建議先換別的邊界或先囤積圖表。',
+      '沒有神聖邊界、或倉庫裡沒有海洋之柱海圖時，這個策略效果會大打折扣，建議先換別的邊界或先囤積海圖。',
     ],
     weights: {
       'adjacent:rare': 10,
@@ -182,7 +182,7 @@ export const STRATEGIES: StrategyDef[] = [
       { nearBorderId: 'b-divine', adjacentToBorder: true, modIds: ['adj-star-1', 'adj-star-2'], bonus: 30 },
       { nearBorderId: 'b-divine', adjacentToBorder: true, modIds: ['adj-box-1', 'adj-box-2', 'adj-box-3'], bonus: 20 },
     ],
-    requirements: [{ nameMatch: NAME_MATCH_PILLAR, count: 1, label: 'Sea-Pillar 類型圖表 × 1' }],
+    requirements: [{ nameMatch: NAME_MATCH_PILLAR, count: 1, label: '海洋之柱海圖 × 1' }],
     requiresBorderId: { id: 'b-divine', label: '神聖邊界（稀有怪掉神聖石）' },
     waitHint: '沒有神聖邊界時，建議先用別的策略跑一般海圖，等重擲到神聖邊界再切回這個策略。',
   },

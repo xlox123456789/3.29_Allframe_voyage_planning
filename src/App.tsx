@@ -119,7 +119,7 @@ function BorderPicker({
             setOpen(false)
           }}
         >
-          {lang === 'en' ? '(clear / not rolled)' : '（清空 / 未擲出）'}
+          {lang === 'en' ? '(clear / not rolled)' : '（清空邊界詞）'}
         </div>
         {filtered.map((m) => (
           <div
@@ -152,7 +152,7 @@ function BorderPicker({
         }}
         title={mod ? labelOf(mod) : lang === 'en' ? 'Click to set this border' : '點擊設定這段邊界'}
       >
-        {mod ? (lang === 'en' ? mod.textEn ?? mod.short ?? mod.text : mod.short ?? mod.text) : lang === 'en' ? 'Not rolled' : '未擲出'}
+        {mod ? (lang === 'en' ? mod.textEn ?? mod.short ?? mod.text : mod.short ?? mod.text) : lang === 'en' ? 'Not rolled' : '邊界詞'}
       </button>
       {dropdown && createPortal(dropdown, document.body)}
     </div>
