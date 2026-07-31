@@ -176,6 +176,16 @@ function ShapeIcon({ edges }: { edges: Edges }) {
   )
 }
 
+function chartHoverText(chart: ChartData): string {
+  const details = [chart.name]
+  if (chart.areaName) details.push(`區域：${chart.areaName}`)
+  details.push(`等級：${chart.level}`)
+  if (chart.shape) details.push(`形狀：${chart.shape}`)
+  if (chart.implicitText) details.push(`固定詞綴：${chart.implicitText}`)
+  details.push(chart.rawText ? `其他詞綴：\n${chart.rawText}` : '其他詞綴：未解析到其他詞綴')
+  return details.join('\n')
+}
+
 // ---------------------------------------------------------------------------
 // 九宮格 + 對齊的 12 段邊界
 // ---------------------------------------------------------------------------
@@ -249,7 +259,10 @@ function VoyageBoard({
       cell(
         col + 2,
         row + 2,
-        <div className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}>
+        <div
+          className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}
+          title={chart ? chartHoverText(chart) : undefined}
+        >
           {chart ? (
             <>
               <ShapeIcon edges={rotateEdges(chart.edges, p!.rotation)} />
