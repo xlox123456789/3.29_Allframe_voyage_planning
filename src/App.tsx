@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { Board, Borders, ChartData, Edges } from './types'
 import { emptyBorders } from './types'
 import { parseChartText } from './logic/parser'
@@ -31,27 +32,118 @@ function BorderPicker({
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, visible: false })
   const rootRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const mod = value ? borderModById.get(value) : null
-  const labelOf = (m: (typeof BORDER_MODS)[number]) => (lang === 'en' ? m.textEn ?? m.text : m.text)
+  const labelOf = useCallback(
+    (m: (typeof BORDER_MODS)[number]) => (lang === 'en' ? m.textEn ?? m.text : m.text),
+    [lang],
+  )
+
+  const updateDropdownPosition = useCallback(() => {
+    const button = buttonRef.current
+    if (!button) return
+
+    const viewportPadding = 8
+    const gap = 6
+    const width = 280
+    const buttonRect = button.getBoundingClientRect()
+    const dropdownHeight = dropdownRef.current?.offsetHeight ?? 320
+    const preferredLeft =
+      align === 'left' || align === 'right'
+        ? buttonRect.left
+        : buttonRect.left + buttonRect.width / 2 - width / 2
+    const maxLeft = Math.max(viewportPadding, window.innerWidth - width - viewportPadding)
+    const left = Math.min(Math.max(preferredLeft, viewportPadding), maxLeft)
+    const below = buttonRect.bottom + gap
+    const above = buttonRect.top - dropdownHeight - gap
+    const top = below + dropdownHeight <= window.innerHeight - viewportPadding || above < viewportPadding ? below : above
+
+    setDropdownPosition({ top, left, visible: true })
+  }, [align])
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node
+      if (!rootRef.current?.contains(target) && !dropdownRef.current?.contains(target)) setOpen(false)
     }
     document.addEventListener('mousedown', onClickOutside)
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [])
 
+  useLayoutEffect(() => {
+    if (!open) {
+      setDropdownPosition((position) => ({ ...position, visible: false }))
+      return
+    }
+
+    updateDropdownPosition()
+    window.addEventListener('resize', updateDropdownPosition)
+    window.addEventListener('scroll', updateDropdownPosition, true)
+    return () => {
+      window.removeEventListener('resize', updateDropdownPosition)
+      window.removeEventListener('scroll', updateDropdownPosition, true)
+    }
+  }, [open, updateDropdownPosition])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return BORDER_MODS
     return BORDER_MODS.filter((m) => labelOf(m).toLowerCase().includes(q) || m.short?.includes(query.trim()))
-  }, [query, lang])
+  }, [query, labelOf])
+
+  const dropdown = open ? (
+    <div
+      ref={dropdownRef}
+      className="border-dropdown"
+      style={{
+        top: dropdownPosition.top,
+        left: dropdownPosition.left,
+        visibility: dropdownPosition.visible ? 'visible' : 'hidden',
+      }}
+    >
+      <input
+        autoFocus
+        className="border-search"
+        placeholder={lang === 'en' ? 'Type to search…' : '輸入關鍵字快速搜尋…'}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <div className="border-options">
+        <div
+          className="border-option clear"
+          onClick={() => {
+            onChange(null)
+            setOpen(false)
+          }}
+        >
+          {lang === 'en' ? '(clear / not rolled)' : '（清空 / 未擲出）'}
+        </div>
+        {filtered.map((m) => (
+          <div
+            key={m.id}
+            className={`border-option ${m.id === value ? 'active' : ''}`}
+            onClick={() => {
+              onChange(m.id)
+              setOpen(false)
+            }}
+          >
+            {labelOf(m)}
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="border-option empty">{lang === 'en' ? 'No matching border mod' : '找不到符合的邊界詞綴'}</div>
+        )}
+      </div>
+    </div>
+  ) : null
 
   return (
     <div className={`border-picker align-${align}`} ref={rootRef}>
       <button
+        ref={buttonRef}
         type="button"
         className={`border-pill ${mod ? 'set' : ''}`}
         onClick={() => {
@@ -62,43 +154,7 @@ function BorderPicker({
       >
         {mod ? (lang === 'en' ? mod.textEn ?? mod.short ?? mod.text : mod.short ?? mod.text) : lang === 'en' ? 'Not rolled' : '未擲出'}
       </button>
-      {open && (
-        <div className="border-dropdown">
-          <input
-            autoFocus
-            className="border-search"
-            placeholder={lang === 'en' ? 'Type to search…' : '輸入關鍵字快速搜尋…'}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <div className="border-options">
-            <div
-              className="border-option clear"
-              onClick={() => {
-                onChange(null)
-                setOpen(false)
-              }}
-            >
-              {lang === 'en' ? '(clear / not rolled)' : '（清空 / 未擲出）'}
-            </div>
-            {filtered.map((m) => (
-              <div
-                key={m.id}
-                className={`border-option ${m.id === value ? 'active' : ''}`}
-                onClick={() => {
-                  onChange(m.id)
-                  setOpen(false)
-                }}
-              >
-                {labelOf(m)}
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <div className="border-option empty">{lang === 'en' ? 'No matching border mod' : '找不到符合的邊界詞綴'}</div>
-            )}
-          </div>
-        </div>
-      )}
+      {dropdown && createPortal(dropdown, document.body)}
     </div>
   )
 }

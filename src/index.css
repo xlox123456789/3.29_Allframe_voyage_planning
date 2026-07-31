@@ -112,11 +112,8 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 .border-pill.set { border-color: #5bb0c9; color: #cfeaf2; background: #0d1e22; }
 
 .border-dropdown {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  z-index: 1000;
   width: 280px;
   background: #101a14;
   border: 1px solid #253a2c;
@@ -124,7 +121,6 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
-.align-left .border-dropdown, .align-right .border-dropdown { left: 0; transform: none; }
 .border-search {
   width: 100%;
   background: #0a120d;
