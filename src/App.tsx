@@ -552,6 +552,21 @@ function ChartImporter({
         }
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onPaste={(e) => {
+          const pastedText = e.clipboardData.getData('text')
+          const { charts: cs, rejected } = parseChartText(pastedText)
+          const chart = cs[0]
+          const isSingleCompleteChart = cs.length === 1 && chart.level > 0 && Boolean(chart.shape)
+          if (!isSingleCompleteChart) return
+
+          e.preventDefault()
+          onImport(cs)
+          setText('')
+          setMsg(
+            '已自動加入 1 張' +
+              (rejected.length ? `，跳過 ${rejected.length} 項（${rejected.map((r) => r.reason).join('；')}）` : ''),
+          )
+        }}
         rows={10}
       />
       <button
