@@ -274,19 +274,13 @@ function VoyageBoard({
 // ---------------------------------------------------------------------------
 function ChartLibrary({
   charts,
-  onImport,
   onRemove,
   onClear,
-  lang,
 }: {
   charts: ChartData[]
-  onImport: (charts: ChartData[]) => void
   onRemove: (uid: string) => void
   onClear: () => void
-  lang: 'zh' | 'en'
 }) {
-  const [text, setText] = useState('')
-  const [msg, setMsg] = useState<string | null>(null)
   return (
     <div className="library">
       <div className="library-header">
@@ -297,33 +291,6 @@ function ChartLibrary({
           清空倉庫
         </button>
       </div>
-      <textarea
-        placeholder={
-          lang === 'en'
-            ? 'Ctrl+V paste a Chart (Ctrl+C in-game). You can paste several at once.'
-            : 'Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製），可一次貼多張'
-        }
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={6}
-      />
-      <button
-        className="primary-btn"
-        onClick={() => {
-          const { charts: cs, rejected } = parseChartText(text)
-          onImport(cs)
-          setText('')
-          setMsg(
-            `已加入 ${cs.length} 張` +
-              (rejected.length ? `，跳過 ${rejected.length} 項（${rejected.map((r) => r.reason).join('；')}）` : ''),
-          )
-        }}
-        disabled={!text.trim()}
-      >
-        加入倉庫
-      </button>
-      {msg && <div className="import-msg">{msg}</div>}
-
       <div className="chart-list">
         {charts.length === 0 && <div className="empty-hint">尚無海圖，貼上文字後按「加入倉庫」</div>}
         {charts.map((c) => (
@@ -479,11 +446,14 @@ export default function App() {
           <h2>② 海圖倉庫</h2>
           <ChartLibrary
             charts={charts}
-            onImport={(cs) => setCharts((prev) => [...prev, ...cs])}
             onRemove={(uid) => setCharts((prev) => prev.filter((c) => c.uid !== uid))}
             onClear={() => setCharts([])}
-            lang={lang}
           />
+        </section>
+
+        <section className="panel">
+          <h2>複製貼上區</h2>
+          <ChartImporter onImport={(cs) => setCharts((prev) => [...prev, ...cs])} lang={lang} />
         </section>
       </div>
 
@@ -555,6 +525,51 @@ export default function App() {
           </a>
         </div>
       </footer>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 海圖複製貼上區
+// ---------------------------------------------------------------------------
+function ChartImporter({
+  onImport,
+  lang,
+}: {
+  onImport: (charts: ChartData[]) => void
+  lang: 'zh' | 'en'
+}) {
+  const [text, setText] = useState('')
+  const [msg, setMsg] = useState<string | null>(null)
+
+  return (
+    <div className="library">
+      <textarea
+        placeholder={
+          lang === 'en'
+            ? 'Ctrl+V paste a Chart (Ctrl+C in-game). You can paste several at once.'
+            : 'Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製），可一次貼多張'
+        }
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={10}
+      />
+      <button
+        className="primary-btn"
+        onClick={() => {
+          const { charts: cs, rejected } = parseChartText(text)
+          onImport(cs)
+          setText('')
+          setMsg(
+            `已加入 ${cs.length} 張` +
+              (rejected.length ? `，跳過 ${rejected.length} 項（${rejected.map((r) => r.reason).join('；')}）` : ''),
+          )
+        }}
+        disabled={!text.trim()}
+      >
+        加入倉庫
+      </button>
+      {msg && <div className="import-msg">{msg}</div>}
     </div>
   )
 }

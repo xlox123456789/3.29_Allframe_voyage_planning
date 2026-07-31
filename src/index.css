@@ -32,12 +32,13 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 
 .main-grid {
   display: grid;
-  grid-template-columns: minmax(620px, 3fr) minmax(420px, 2fr);
-  gap: 20px;
+  grid-template-columns: 600px 300px 300px;
+  gap: 16px;
   align-items: start;
+  justify-content: center;
   width: 100%;
 }
-@media (max-width: 1180px) {
+@media (max-width: 1340px) {
   .main-grid { grid-template-columns: 1fr; }
   .main-grid .panel { width: 100%; }
 }
