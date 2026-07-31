@@ -9,20 +9,17 @@
 // Sea-Pillar（區域名稱「海洋之柱」）、命運的保險箱＝Diviner's Strongbox 均已確認。
 
 import type { Edges, Stat, Weights } from '../types'
+import type { ChartMatcher } from '../logic/chartMatching'
 
-export interface PositionRule {
+export interface PositionRule extends ChartMatcher {
   cells?: number[]
   nearBorderId?: string
   adjacentToBorder?: boolean
-  modIds?: string[]
-  nameMatch?: string
   rewardStat?: { stat: Stat; per: number }
   bonus: number
 }
 
-export interface StrategyRequirement {
-  modIds?: string[]
-  nameMatch?: string
+export interface StrategyRequirement extends ChartMatcher {
   count: number
   label: string
 }
@@ -61,13 +58,14 @@ export const STRATEGIES: StrategyDef[] = [
     name: 'Speedrun Strongboxes（速刷保險箱）',
     tagline: '把一張保險箱海圖釘在中心，旁邊塞滿高數量海圖，衝一輪就走。',
     guide: [
-      '中心格優先放「技工保險箱」海圖，沒有的話退而求其次放「命運保險箱」或「瓶中信」海圖。',
+      '中心格優先放「技工保險箱」海圖，沒有的話退而求其次放「奧術師保險箱」、「命運保險箱」或「瓶中信」海圖。',
       '中心格以外如果放了保險箱海圖反而會扣分——這類海圖要集中在中心才划算。',
       '其餘格子盡量放「物品數量」較高的圖表，並留意邊界是否擲到神聖石／崇高石／古變石相關詞綴，能大幅提升單趟收益。',
       '目標是快速把 9 張圖跑完，不追求極致收益，講究翻頁速度。',
     ],
     weights: {
       'adjacent:opbox': 10,
+      'adjacent:arcanistbox': 7,
       'adjacent:divbox': 7,
       'adjacent:msg': 7,
       'voyage:quant': 5,
@@ -78,19 +76,82 @@ export const STRATEGIES: StrategyDef[] = [
       'border:ancient': 3,
     },
     rules: [
-      { cells: [CENTER], modIds: ['adj-opbox-1', 'adj-opbox-2'], bonus: 55 },
-      { cells: [CENTER], modIds: ['adj-divbox-1', 'adj-divbox-2', 'adj-msg-1', 'adj-msg-2'], bonus: 40 },
+      {
+        cells: [CENTER],
+        modIds: ['adj-opbox-1', 'adj-opbox-2'],
+        implicitTextMatch: ["Operative's Strongbox", '技工保險箱', '特工的保險箱'],
+        bonus: 55,
+      },
+      {
+        cells: [CENTER],
+        modIds: ['adj-arcanistbox-1', 'adj-arcanistbox-2', 'adj-divbox-1', 'adj-divbox-2', 'adj-msg-1', 'adj-msg-2'],
+        implicitTextMatch: [
+          "Arcanist's Strongbox",
+          "Diviner's Strongbox",
+          'Messages in Bottles',
+          'Message in a Bottle',
+          '奧術師的保險箱',
+          '命運保險箱',
+          '命運的保險箱',
+          '瓶中信',
+        ],
+        bonus: 40,
+      },
       {
         cells: [0, 1, 2, 3, 5, 6, 7, 8],
-        modIds: ['adj-opbox-1', 'adj-opbox-2', 'adj-divbox-1', 'adj-divbox-2', 'adj-msg-1', 'adj-msg-2'],
+        modIds: [
+          'adj-opbox-1',
+          'adj-opbox-2',
+          'adj-arcanistbox-1',
+          'adj-arcanistbox-2',
+          'adj-divbox-1',
+          'adj-divbox-2',
+          'adj-msg-1',
+          'adj-msg-2',
+        ],
+        implicitTextMatch: [
+          "Operative's Strongbox",
+          "Arcanist's Strongbox",
+          "Diviner's Strongbox",
+          'Messages in Bottles',
+          'Message in a Bottle',
+          '技工保險箱',
+          '特工的保險箱',
+          '奧術師的保險箱',
+          '命運保險箱',
+          '命運的保險箱',
+          '瓶中信',
+        ],
         bonus: -40,
       },
     ],
     requirements: [
       {
-        modIds: ['adj-opbox-1', 'adj-opbox-2', 'adj-divbox-1', 'adj-divbox-2', 'adj-msg-1', 'adj-msg-2'],
+        modIds: [
+          'adj-opbox-1',
+          'adj-opbox-2',
+          'adj-arcanistbox-1',
+          'adj-arcanistbox-2',
+          'adj-divbox-1',
+          'adj-divbox-2',
+          'adj-msg-1',
+          'adj-msg-2',
+        ],
+        implicitTextMatch: [
+          "Operative's Strongbox",
+          "Arcanist's Strongbox",
+          "Diviner's Strongbox",
+          'Messages in Bottles',
+          'Message in a Bottle',
+          '技工保險箱',
+          '特工的保險箱',
+          '奧術師的保險箱',
+          '命運保險箱',
+          '命運的保險箱',
+          '瓶中信',
+        ],
         count: 1,
-        label: '任一保險箱海圖 × 1（放中心用）',
+        label: '技工／奧術師／命運保險箱或瓶中信海圖 × 1（放中心用）',
       },
     ],
   },
@@ -99,9 +160,9 @@ export const STRATEGIES: StrategyDef[] = [
   {
     id: 'meatfish',
     name: 'Meatfish（稀有怪傳說裝掉落特化）',
-    tagline: '集中巨大海星、附身怪、金燈籠與海洋之柱，堆出被附身的巨型稀有怪，拚傳說裝掉落。',
+    tagline: '集中巨大海星、罪魂、金燈籠與海洋之柱，堆出被罪魂附身的巨型稀有怪，拚傳說裝掉落。',
     guide: [
-      '巨大海星海圖放上／下中央格，附身怪海圖放右中央格。',
+      '巨大海星海圖放上／下中央格，罪魂海圖放右中央格。',
       '金燈籠圖表優先放中心，收集越多燈籠 = 越多數量與稀有度加成。',
       '海洋之柱海圖放四個角落。',
       '這套很吃資源、風險也高（容易被巨怪反殺，俗稱 very rippy），收穫是成堆的稀有怪掉落與 Mageblood / Headhunter 級別的傳說裝機會。',
@@ -109,6 +170,7 @@ export const STRATEGIES: StrategyDef[] = [
     weights: {
       'adjacent:star': 10,
       'adjacent:pantheon': 10,
+      'adjacent:prison': 10,
       'adjacent:lantern': 10,
       'voyage:possess': 10,
       'voyage:fracture': 8,
@@ -118,13 +180,23 @@ export const STRATEGIES: StrategyDef[] = [
     },
     rules: [
       { cells: TOP_BOTTOM_MID, modIds: ['adj-star-1', 'adj-star-2'], bonus: 80 },
-      { cells: [RIGHT_MID], modIds: ['adj-pantheon-1'], bonus: 80 },
+      {
+        cells: [RIGHT_MID],
+        modIds: ['adj-pantheon-1', 'adj-prison-1', 'adj-prison-2'],
+        implicitTextMatch: ['關滿罪魂的囚牢', 'cage of Tormented Spirits', 'cages of Tormented Spirits'],
+        bonus: 80,
+      },
       { cells: [CENTER], modIds: ['adj-lantern-1'], bonus: 40 },
       { cells: CORNERS, nameMatch: NAME_MATCH_PILLAR, bonus: 40 },
     ],
     requirements: [
       { modIds: ['adj-star-1', 'adj-star-2'], count: 2, label: '巨大海星海圖 × 2' },
-      { modIds: ['adj-pantheon-1'], count: 1, label: '附身怪海圖 × 1' },
+      {
+        modIds: ['adj-pantheon-1', 'adj-prison-1', 'adj-prison-2'],
+        implicitTextMatch: ['關滿罪魂的囚牢', 'cage of Tormented Spirits', 'cages of Tormented Spirits'],
+        count: 1,
+        label: '罪魂海圖 × 1',
+      },
       { nameMatch: NAME_MATCH_PILLAR, count: 2, label: '海洋之柱海圖 × 2' },
     ],
   },

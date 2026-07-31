@@ -3,6 +3,7 @@ import { borderTouches } from '../types'
 import type { PositionRule } from '../data/strategies'
 import { checkConnectivity, rotateEdges } from './connectivity'
 import { scoreBoard, type ScoreOptions } from './scoring'
+import { chartMatches } from './chartMatching'
 
 export interface SolverOptions extends ScoreOptions {
   mode: ConnectivityMode
@@ -72,17 +73,6 @@ function resolveRuleCells(rule: PositionRule, borders: Borders): number[] {
   return []
 }
 
-/** does this chart satisfy the rule's mod/name matcher? */
-function chartMatchesRule(chart: ChartData, rule: PositionRule): boolean {
-  if (rule.modIds && chart.modIds.some((id) => rule.modIds!.includes(id))) return true
-  if (rule.nameMatch) {
-    const needle = rule.nameMatch.toLowerCase()
-    if (chart.name.toLowerCase().includes(needle)) return true
-    if (chart.areaName?.toLowerCase().includes(needle)) return true
-  }
-  return false
-}
-
 /** objective bonus from strategy position rules for this arrangement */
 function strategyBonus(
   board: Board,
@@ -97,7 +87,7 @@ function strategyBonus(
       if (!p) continue
       const chart = charts.get(p.chartUid)
       if (!chart) continue
-      if (chartMatchesRule(chart, rule)) bonus += rule.bonus
+      if (chartMatches(chart, rule)) bonus += rule.bonus
       if (rule.rewardStat) {
         const r = chart.rewards?.find((e) => e.stat === rule.rewardStat!.stat)
         if (r) bonus += (r.percent / 100) * rule.rewardStat.per
@@ -245,11 +235,11 @@ function hillClimb(
       //    to fit, random otherwise
       if (opts.strategyRules) {
         for (const rule of opts.strategyRules) {
-          if (rule.bonus <= 0 || (!rule.modIds && !rule.nameMatch)) continue
+          if (rule.bonus <= 0 || (!rule.modIds && !rule.implicitTextMatch && !rule.nameMatch)) continue
           for (const cell of resolveRuleCells(rule, borders)) {
             if (board[cell]) continue
             const used = taken()
-            const cands = shuffled.filter((c) => !used.has(c.uid) && chartMatchesRule(c, rule))
+            const cands = shuffled.filter((c) => !used.has(c.uid) && chartMatches(c, rule))
             if (cands.length === 0) continue
             const target = opts.strategyLayout?.[cell]
             const shaped = target
@@ -280,7 +270,7 @@ function hillClimb(
             (c) =>
               !used.has(c.uid) &&
               rotationFor(c.edges, target, rotMax) !== null &&
-              !bannedRules?.some((ru) => chartMatchesRule(c, ru)),
+              !bannedRules?.some((ru) => chartMatches(c, ru)),
           )
           if (pick)
             board[cell] = { chartUid: pick.uid, rotation: rotationFor(pick.edges, target, rotMax)! }

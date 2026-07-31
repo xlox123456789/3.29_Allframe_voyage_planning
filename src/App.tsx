@@ -5,6 +5,7 @@ import { emptyBorders } from './types'
 import { parseChartText } from './logic/parser'
 import { solve, type SolverResult } from './logic/solver'
 import { rotateEdges } from './logic/connectivity'
+import { chartMatches } from './logic/chartMatching'
 import { BORDER_MODS, borderModById } from './data/mods'
 import { STRATEGIES, type StrategyDef, type StrategyRequirement } from './data/strategies'
 import './index.css'
@@ -352,13 +353,7 @@ function StrategyPicker({
 }
 
 function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean {
-  const count = charts.filter(
-    (c) =>
-      (req.modIds && c.modIds.some((id) => req.modIds!.includes(id))) ||
-      (req.nameMatch &&
-        (c.name.toLowerCase().includes(req.nameMatch.toLowerCase()) ||
-          c.areaName?.toLowerCase().includes(req.nameMatch.toLowerCase()))),
-  ).length
+  const count = charts.filter((chart) => chartMatches(chart, req)).length
   return count >= req.count
 }
 

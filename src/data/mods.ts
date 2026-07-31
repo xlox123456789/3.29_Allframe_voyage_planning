@@ -160,7 +160,7 @@ export const VOYAGE_MODS: VoyageModDef[] = [
   { id: 'adj-gold-1', text: '相鄰區域內的怪物掉落的裝備有 40% 會改為掉落金幣', textEn: "40% of Equipment dropped by monsters in adjacent Areas is converted to Gold", short: '40% 裝備轉金幣', scope: 'adjacent', effects: [{ stat: 'gold', percent: 40 }] },
   { id: 'adj-gold-2', text: '相鄰區域內的怪物掉落的裝備有 80% 會改為掉落金幣', textEn: "80% of Equipment dropped by monsters in adjacent Areas is converted to Gold", short: '80% 裝備轉金幣', scope: 'adjacent', effects: [{ stat: 'gold', percent: 80 }] },
 
-  { id: 'adj-prison-1', text: '相鄰區域內含有額外 1 個關滿罪魂的囚牢', textEn: "Adjacent Areas contain 1 additional cages of Tormented Spirits", short: '+1 罪魂囚牢', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 25 }] },
+  { id: 'adj-prison-1', text: '相鄰區域內含有額外一個關滿罪魂的囚牢', textEn: "Adjacent Areas contain an additional cage of Tormented Spirits", short: '+1 罪魂囚牢', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 25 }] },
   { id: 'adj-prison-2', text: '相鄰區域內含有額外 2 個關滿罪魂的囚牢', textEn: "Adjacent Areas contain 2 additional cages of Tormented Spirits", short: '+2 罪魂囚牢', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
 
   // --- 命運的保險箱（✅ 確認對應 Diviner's Strongbox） ---
