@@ -49,7 +49,7 @@ const RIGHT_MID = 5
 
 // ✅ 確認：「Sea Pillars」= 區域名稱「海洋之柱」（不是海圖本身的花名），
 // 判斷邏輯已經改成同時比對 chart.name 與 chart.areaName。
-const NAME_MATCH_PILLAR = '柱'
+const NAME_MATCHES_PILLAR = ['柱', 'pillar']
 
 export const STRATEGIES: StrategyDef[] = [
   // -------------------------------------------------------------------------
@@ -187,7 +187,7 @@ export const STRATEGIES: StrategyDef[] = [
         bonus: 80,
       },
       { cells: [CENTER], modIds: ['adj-lantern-1'], bonus: 40 },
-      { cells: CORNERS, nameMatch: NAME_MATCH_PILLAR, bonus: 40 },
+      { cells: CORNERS, nameMatches: NAME_MATCHES_PILLAR, bonus: 40 },
     ],
     requirements: [
       { modIds: ['adj-star-1', 'adj-star-2'], count: 2, label: '巨大海星海圖 × 2' },
@@ -197,7 +197,7 @@ export const STRATEGIES: StrategyDef[] = [
         count: 1,
         label: '罪魂海圖 × 1',
       },
-      { nameMatch: NAME_MATCH_PILLAR, count: 2, label: '海洋之柱海圖 × 2' },
+      { nameMatches: NAME_MATCHES_PILLAR, count: 2, label: '海洋之柱海圖 × 2' },
     ],
   },
 
@@ -250,11 +250,11 @@ export const STRATEGIES: StrategyDef[] = [
       'voyage:fracture': 6,
     },
     rules: [
-      { nearBorderId: 'b-divine', nameMatch: NAME_MATCH_PILLAR, bonus: 100 },
+      { nearBorderId: 'b-divine', nameMatches: NAME_MATCHES_PILLAR, bonus: 100 },
       { nearBorderId: 'b-divine', adjacentToBorder: true, modIds: ['adj-star-1', 'adj-star-2'], bonus: 30 },
       { nearBorderId: 'b-divine', adjacentToBorder: true, modIds: ['adj-box-1', 'adj-box-2', 'adj-box-3'], bonus: 20 },
     ],
-    requirements: [{ nameMatch: NAME_MATCH_PILLAR, count: 1, label: '海洋之柱海圖 × 1' }],
+    requirements: [{ nameMatches: NAME_MATCHES_PILLAR, count: 1, label: '海洋之柱海圖 × 1' }],
     requiresBorderId: { id: 'b-divine', label: '神聖邊界（稀有怪掉神聖石）' },
     waitHint: '沒有神聖邊界時，建議先用別的策略跑一般海圖，等重擲到神聖邊界再切回這個策略。',
   },

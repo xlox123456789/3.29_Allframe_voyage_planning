@@ -235,7 +235,7 @@ function hillClimb(
       //    to fit, random otherwise
       if (opts.strategyRules) {
         for (const rule of opts.strategyRules) {
-          if (rule.bonus <= 0 || (!rule.modIds && !rule.implicitTextMatch && !rule.nameMatch)) continue
+          if (rule.bonus <= 0 || (!rule.modIds && !rule.implicitTextMatch && !rule.nameMatch && !rule.nameMatches)) continue
           for (const cell of resolveRuleCells(rule, borders)) {
             if (board[cell]) continue
             const used = taken()

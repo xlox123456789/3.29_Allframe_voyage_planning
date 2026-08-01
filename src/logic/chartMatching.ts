@@ -4,6 +4,7 @@ export interface ChartMatcher {
   modIds?: string[]
   implicitTextMatch?: string[]
   nameMatch?: string
+  nameMatches?: string[]
 }
 
 export function chartMatches(chart: ChartData, matcher: ChartMatcher): boolean {
@@ -12,10 +13,10 @@ export function chartMatches(chart: ChartData, matcher: ChartMatcher): boolean {
   const implicitText = chart.implicitText?.toLowerCase()
   if (implicitText && matcher.implicitTextMatch?.some((text) => implicitText.includes(text.toLowerCase()))) return true
 
-  if (matcher.nameMatch) {
-    const needle = matcher.nameMatch.toLowerCase()
-    if (chart.name.toLowerCase().includes(needle)) return true
-    if (chart.areaName?.toLowerCase().includes(needle)) return true
+  const nameMatches = matcher.nameMatches ?? (matcher.nameMatch ? [matcher.nameMatch] : [])
+  for (const text of nameMatches) {
+    const needle = text.toLowerCase()
+    if (chart.name.toLowerCase().includes(needle) || chart.areaName?.toLowerCase().includes(needle)) return true
   }
 
   return false
