@@ -23,6 +23,14 @@
 
 網站支援中文與英文兩種遊戲客戶端的貼上格式（可以混著貼），介面本身維持全中文。
 
+## 策略與權重來源
+
+本工具採用的策略來自這部 YouTube 影片：[Curse of the Allflame Buffs and My Strategy](https://www.youtube.com/watch?v=E6GMu9Z5j5U)。
+
+這不是 AI 判斷；程式會根據影片作者提供的權重表格，計算海圖如何排列才能讓收益最大化。
+
+**權重表格：** [Google 試算表](https://docs.google.com/spreadsheets/d/1WbjX2wjllotu4CTks3ZTDAskgafGqyKvgcNql7xRczU/htmlview?usp=sharing&pru=AAABn9R9FXc*-GqzDLF8z-wBGbz5WXXyHQ#gid=0)
+
 ## 目前的限制
 
 - 資料是根據玩家實測遊戲畫面 + 社群整理的清單建立的，多數詞綴文字已核對過，少數效果如果之後發現對不上，歡迎回報
