@@ -31,6 +31,26 @@
 
 **權重表格：** [Google 試算表](https://docs.google.com/spreadsheets/d/1WbjX2wjllotu4CTks3ZTDAskgafGqyKvgcNql7xRczU/htmlview?usp=sharing&pru=AAABn9R9FXc*-GqzDLF8z-wBGbz5WXXyHQ#gid=0)
 
+## 海圖倉庫批次複製工具
+
+> [!CAUTION]
+> **疑似踩線，禁止錄影直播，珍惜自己帳號。**
+
+這個工具會在 Path of Exile 視窗內逐格掃描海圖倉庫，將找到的海圖文字集中複製到剪貼簿；不會自動貼到網站。
+
+- **電腦已安裝 AutoHotkey v2：** [下載 AHK 版本](<tools/海圖倉庫批次複製.ahk?raw=1>)
+- **沒有安裝 AutoHotkey：** [下載 EXE 版本](<tools/海圖倉庫批次複製.exe?raw=1>)
+
+EXE 版本未進行程式碼簽章，Windows 可能顯示「未知的發行者」。
+
+<details>
+<summary>檔案 SHA-256</summary>
+
+- `海圖倉庫批次複製.ahk`：`41A5CB908325F80545A027C13448C6D0B800DDCED5AA76F2C3B0C7DE84381F2D`
+- `海圖倉庫批次複製.exe`：`3595CEB35A8B7889902EF695BD962231FB58DB5DD5E5BDBE7922A1E2B8F6E6B9`
+
+</details>
+
 ## 目前的限制
 
 - 資料是根據玩家實測遊戲畫面 + 社群整理的清單建立的，多數詞綴文字已核對過，少數效果如果之後發現對不上，歡迎回報
@@ -66,3 +86,13 @@ src/
 ```
 
 </details>
+
+## MIT License
+
+Copyright 2026 3.29_Allframe_voyage_planning
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
