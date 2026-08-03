@@ -38,18 +38,18 @@
 
 這個工具會在 Path of Exile 視窗內逐格掃描海圖倉庫，將找到的海圖文字集中複製到剪貼簿；不會自動貼到網站。
 
-- **電腦已安裝 AutoHotkey v2：** [直接下載 AHK 版本（ZIP）](https://raw.githubusercontent.com/xlox123456789/3.29_Allframe_voyage_planning/main/downloads/%E6%B5%B7%E5%9C%96%E5%80%89%E5%BA%AB%E6%89%B9%E6%AC%A1%E8%A4%87%E8%A3%BD-AHK.zip)
-- **沒有安裝 AutoHotkey：** [直接下載 EXE 版本（ZIP）](https://raw.githubusercontent.com/xlox123456789/3.29_Allframe_voyage_planning/main/downloads/%E6%B5%B7%E5%9C%96%E5%80%89%E5%BA%AB%E6%89%B9%E6%AC%A1%E8%A4%87%E8%A3%BD-EXE.zip)
+### 使用前請先安裝 AutoHotkey v2
 
-EXE 版本未進行程式碼簽章，Windows 可能顯示「未知的發行者」。
+- [AutoHotkey v2 官網](https://www.autohotkey.com/v2/)
+- Downloads：[**Latest Installer**](https://www.autohotkey.com/download/ahk-v2.exe)（或下載 [latest zip](https://www.autohotkey.com/download/ahk-v2.zip)）
+
+安裝完成後：[直接下載海圖倉庫批次複製 AHK（ZIP）](https://raw.githubusercontent.com/xlox123456789/3.29_Allframe_voyage_planning/main/downloads/%E6%B5%B7%E5%9C%96%E5%80%89%E5%BA%AB%E6%89%B9%E6%AC%A1%E8%A4%87%E8%A3%BD-AHK.zip)
 
 <details>
 <summary>檔案 SHA-256</summary>
 
 - `海圖倉庫批次複製-AHK.zip`：`CD98F468E8BB9BBAB2605AF6B100F5A5908CBD358D11A603F96BFBE99E6134B8`
-- `海圖倉庫批次複製-EXE.zip`：`5A93EB1ADB8D8C613B1D38882E8194C77148D46CDA21B9E88EF5EFD80D98AD35`
 - `海圖倉庫批次複製.ahk`：`41A5CB908325F80545A027C13448C6D0B800DDCED5AA76F2C3B0C7DE84381F2D`
-- `海圖倉庫批次複製.exe`：`3595CEB35A8B7889902EF695BD962231FB58DB5DD5E5BDBE7922A1E2B8F6E6B9`
 
 </details>
 
