@@ -187,6 +187,28 @@ function chartHoverText(chart: ChartData): string {
   return details.join('\n')
 }
 
+async function copyTextToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return
+    } catch {
+      // 剪貼簿權限被瀏覽器拒絕時，改用舊式複製方式。
+    }
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.focus()
+  textarea.select()
+  const copied = document.execCommand('copy')
+  textarea.remove()
+  if (!copied) throw new Error('Clipboard copy failed')
+}
+
 // ---------------------------------------------------------------------------
 // 九宮格 + 對齊的 12 段邊界
 // ---------------------------------------------------------------------------
@@ -203,6 +225,23 @@ function VoyageBoard({
   charts: Map<string, ChartData>
   lang: 'zh' | 'en'
 }) {
+  const [copyNotice, setCopyNotice] = useState<{ chartUid: string; ok: boolean } | null>(null)
+
+  useEffect(() => {
+    if (!copyNotice) return
+    const timer = window.setTimeout(() => setCopyNotice(null), 1400)
+    return () => window.clearTimeout(timer)
+  }, [copyNotice])
+
+  async function copyChartName(chart: ChartData) {
+    try {
+      await copyTextToClipboard(chart.name)
+      setCopyNotice({ chartUid: chart.uid, ok: true })
+    } catch {
+      setCopyNotice({ chartUid: chart.uid, ok: false })
+    }
+  }
+
   const cell = (col: number, row: number, node: React.ReactNode, key: string) => (
     <div key={key} style={{ gridColumn: col, gridRow: row }} className="grid-slot">
       {node}
@@ -263,11 +302,30 @@ function VoyageBoard({
         <div
           className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}
           title={chart ? chartHoverText(chart) : undefined}
+          role={chart ? 'button' : undefined}
+          tabIndex={chart ? 0 : undefined}
+          aria-label={chart ? `複製海圖名稱：${chart.name}` : undefined}
+          onClick={chart ? () => void copyChartName(chart) : undefined}
+          onKeyDown={
+            chart
+              ? (event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    void copyChartName(chart)
+                  }
+                }
+              : undefined
+          }
         >
           {chart ? (
             <>
               <ShapeIcon edges={rotateEdges(chart.edges, p!.rotation)} />
               <div className="cell-name">{chart.name}</div>
+              {copyNotice?.chartUid === chart.uid && (
+                <div className={`cell-copy-notice ${copyNotice.ok ? 'success' : 'error'}`} role="status">
+                  {copyNotice.ok ? '已複製' : '複製失敗'}
+                </div>
+              )}
             </>
           ) : i === 6 ? (
             <div className="cell-empty">⚓<span>起點</span></div>
