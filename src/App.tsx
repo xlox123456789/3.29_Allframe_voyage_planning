@@ -371,6 +371,10 @@ export default function App() {
   const progressTimer = useRef<number | null>(null)
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
+  const plannedChartUids = useMemo(
+    () => new Set(result?.board.flatMap((placement) => (placement ? [placement.chartUid] : [])) ?? []),
+    [result],
+  )
 
   const borderOk = !strategy.requiresBorderId || borders.includes(strategy.requiresBorderId.id)
   const reqStates = (strategy.requirements ?? []).map((r) => ({ req: r, ok: requirementMet(r, charts) }))
@@ -412,6 +416,12 @@ export default function App() {
     progressTimer.current = window.setTimeout(tick, 140)
   }
 
+  function quickDeletePlannedCharts() {
+    if (plannedChartUids.size === 0) return
+    setCharts((prev) => prev.filter((chart) => !plannedChartUids.has(chart.uid)))
+    setResult(null)
+  }
+
   return (
     <div className="app">
       <header>
@@ -448,6 +458,17 @@ export default function App() {
             charts={chartMap}
             lang={lang}
           />
+          <div className="board-quick-delete">
+            <button
+              className="quick-delete-btn"
+              type="button"
+              disabled={running || plannedChartUids.size === 0}
+              onClick={quickDeletePlannedCharts}
+            >
+              快速刪除
+            </button>
+            <span>根據九宮格中的海圖，刪除倉庫裡相對應的九個海圖</span>
+          </div>
         </section>
 
         <section className="panel library-panel">

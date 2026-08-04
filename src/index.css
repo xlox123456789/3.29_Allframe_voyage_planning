@@ -82,14 +82,33 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 .board-panel { grid-area: board; overflow-x: auto; }
 .library-panel { grid-area: library; }
 .board-panel .voyage-board { margin-inline: auto; }
-.import-panel { grid-area: import; height: 700px; }
+.import-panel { grid-area: import; height: 500px; }
 .import-panel .library { display: flex; flex-direction: column; height: calc(100% - 29px); }
 .import-panel textarea { flex: 1; min-height: 0; }
 .import-panel .primary-btn { align-self: flex-start; }
-@media (max-width: 1099px) {
-  .import-panel { height: auto; min-height: 520px; }
-  .import-panel .library { height: auto; min-height: 440px; }
+
+.board-quick-delete {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  color: #7f9587;
+  font-size: 12px;
 }
+.quick-delete-btn {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1px solid #704038;
+  border-radius: 7px;
+  background: #2b1815;
+  color: #e5a196;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.quick-delete-btn:hover:not(:disabled) { background: #3b211d; border-color: #a85b4f; }
+.quick-delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ---------------------------------------------------------------------- */
 /* 九宮格 + 對齊邊界（5x5 grid：外圈是邊界，中間 3x3 是海圖格） */
