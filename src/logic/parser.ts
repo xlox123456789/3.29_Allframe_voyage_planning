@@ -192,8 +192,6 @@ export function parseChartText(text: string): ParseResult {
       }
     }
     const name = nameLineIdxs.length ? nameLineIdxs.map((i) => lines[i]).join(' ') : lang === 'en' ? 'Unknown Chart' : '未知海圖'
-    const rarity = lines[rarityIdx]?.replace(L.rarityLine, '').replace(/^(稀有度|Rarity):/i, '').trim()
-
     // 區域名稱（第一個 -------- 分隔線後的下一行），像「深海平原」「海洋之柱」/ "Sea Pillars"，
     // Sea-Pillar 這種特殊區域類型是靠這個判斷，不是靠海圖本身的名稱
     let areaName: string | undefined
@@ -268,10 +266,9 @@ export function parseChartText(text: string): ParseResult {
       ? affixes.map((a) => `{${a.type} "${a.name}"} ${a.lines.join(' / ')}`).join('\n')
       : undefined
 
-    const rarityLabel = rarity ? (lang === 'en' ? ` (${rarity})` : `（${rarity}）`) : ''
     charts.push({
       uid: newUid(),
-      name: `${name}${rarityLabel}`,
+      name,
       level,
       edges,
       modIds,

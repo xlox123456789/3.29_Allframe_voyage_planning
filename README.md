@@ -38,12 +38,11 @@
 
 這個工具會在 Path of Exile 視窗內逐格掃描海圖倉庫，將找到的海圖文字集中複製到剪貼簿；不會自動貼到網站。
 
-### 使用前請先安裝 AutoHotkey v2
+### 使用步驟
 
-- [AutoHotkey v2 官網](https://www.autohotkey.com/v2/)
-- Downloads：[**Latest Installer**](https://www.autohotkey.com/download/ahk-v2.exe)（或下載 [latest zip](https://www.autohotkey.com/download/ahk-v2.zip)）
-
-安裝完成後：[直接下載海圖倉庫批次複製 AHK（ZIP）](https://raw.githubusercontent.com/xlox123456789/3.29_Allframe_voyage_planning/main/downloads/%E6%B5%B7%E5%9C%96%E5%80%89%E5%BA%AB%E6%89%B9%E6%AC%A1%E8%A4%87%E8%A3%BD-AHK.zip)
+1. 下載 AHK2：[AutoHotkey v2 官網](https://www.autohotkey.com/v2/)／[**Latest Installer**](https://www.autohotkey.com/download/ahk-v2.exe)（或下載 [latest zip](https://www.autohotkey.com/download/ahk-v2.zip)）
+2. 安裝完成後：[直接下載海圖倉庫批次複製 AHK（ZIP）](https://raw.githubusercontent.com/xlox123456789/3.29_Allframe_voyage_planning/main/downloads/%E6%B5%B7%E5%9C%96%E5%80%89%E5%BA%AB%E6%89%B9%E6%AC%A1%E8%A4%87%E8%A3%BD-AHK.zip)
+3. 剩下步驟心領神會，不教學。
 
 <details>
 <summary>檔案 SHA-256</summary>
