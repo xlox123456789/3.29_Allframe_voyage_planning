@@ -32,14 +32,33 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 
 .main-grid {
   display: grid;
-  grid-template-columns: 700px 500px 500px;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) minmax(0, 5fr);
+  grid-template-areas: "board library import";
   gap: 16px;
   align-items: start;
   justify-content: start;
   width: 100%;
+  max-width: 1732px;
 }
-@media (max-width: 1700px) {
-  .main-grid { grid-template-columns: 1fr; }
+@media (min-width: 1200px) and (max-width: 1699px) {
+  .main-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-areas:
+      "board library"
+      "board import";
+    max-width: 1216px;
+  }
+  .main-grid .panel { width: 100%; }
+}
+@media (max-width: 1199px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "board"
+      "library"
+      "import";
+    max-width: none;
+  }
   .main-grid .panel { width: 100%; }
 }
 
@@ -59,13 +78,14 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
   justify-content: space-between;
 }
 .panel-sub { font-size: 12px; color: #5f7466; font-weight: normal; }
-.board-panel { overflow-x: auto; }
+.board-panel { grid-area: board; overflow-x: auto; }
+.library-panel { grid-area: library; }
 .board-panel .voyage-board { margin-inline: auto; }
-.import-panel { height: 700px; }
+.import-panel { grid-area: import; height: 700px; }
 .import-panel .library { display: flex; flex-direction: column; height: calc(100% - 29px); }
 .import-panel textarea { flex: 1; min-height: 0; }
 .import-panel .primary-btn { align-self: flex-start; }
-@media (max-width: 1700px) {
+@media (max-width: 1199px) {
   .import-panel { height: auto; min-height: 520px; }
   .import-panel .library { height: auto; min-height: 440px; }
 }

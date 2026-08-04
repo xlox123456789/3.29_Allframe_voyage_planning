@@ -450,7 +450,7 @@ export default function App() {
           />
         </section>
 
-        <section className="panel">
+        <section className="panel library-panel">
           <h2>② 海圖倉庫</h2>
           <ChartLibrary
             charts={charts}
