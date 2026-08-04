@@ -17,6 +17,16 @@ const RIGHT = [3, 4, 5]
 const BOTTOM = [6, 7, 8]
 const LEFT = [9, 10, 11]
 
+type GaEventParams = Record<string, string | number | boolean>
+type GtagWindow = Window & {
+  gtag?: (command: 'event', eventName: string, params?: GaEventParams) => void
+}
+
+function trackGaEvent(eventName: string, params?: GaEventParams) {
+  const gaWindow = window as GtagWindow
+  gaWindow.gtag?.('event', eventName, params)
+}
+
 // ---------------------------------------------------------------------------
 // 可打字搜尋的邊界選擇器
 // ---------------------------------------------------------------------------
@@ -236,6 +246,7 @@ function VoyageBoard({
   async function copyChartName(chart: ChartData) {
     try {
       await copyTextToClipboard(chart.name)
+      trackGaEvent('chart_copy_success')
       setCopyNotice({ chartUid: chart.uid, ok: true })
     } catch {
       setCopyNotice({ chartUid: chart.uid, ok: false })
@@ -439,6 +450,11 @@ export default function App() {
   const allOk = borderOk && reqStates.every((r) => r.ok)
 
   function runSolver() {
+    trackGaEvent('start_planning_click', {
+      strategy: strategy.id,
+      chart_count: charts.length,
+      border_count: borders.filter(Boolean).length,
+    })
     setRunning(true)
     setProgress(0)
     if (progressTimer.current) window.clearTimeout(progressTimer.current)
