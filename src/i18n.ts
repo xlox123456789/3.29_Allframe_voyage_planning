@@ -51,6 +51,10 @@ export interface UiStrings {
   autoWatchDenied: string
   autoWatchUnsupported: string
   autoWatchAdded: (n: number) => string
+  autoWatchDeniedTitle: string
+  noticeClose: string
+  /** 條列多個名稱時用的分隔符號 */
+  listSeparator: string
 
   // ③ 選擇策略
   strategyPanel: string
@@ -119,7 +123,10 @@ const zh: UiStrings = {
     '打開後，在遊戲裡 Ctrl+C 複製海圖，切回這個分頁就會自動入庫，不用再手動貼上。瀏覽器規定只有「這個分頁有焦點」時才讀得到剪貼簿，所以還是要切回來一次，沒辦法在你還在遊戲裡的時候就先收好。',
   autoWatchDenied: '瀏覽器擋掉了剪貼簿讀取權限。請點網址列左邊的圖示，把「剪貼簿」設成允許後再打開一次。',
   autoWatchUnsupported: '這個瀏覽器不支援讀取剪貼簿，請用下面的貼上框。',
-  autoWatchAdded: (n) => `自動加入 ${n} 張`,
+  autoWatchAdded: (n) => `已自動加入 ${n} 張海圖`,
+  autoWatchDeniedTitle: '讀不到剪貼簿',
+  noticeClose: '關閉通知',
+  listSeparator: '、',
 
   strategyPanel: '③ 選擇策略',
   requirementsTitle: '建議需求',
@@ -184,6 +191,9 @@ const en: UiStrings = {
     'The browser blocked clipboard read access. Click the icon at the left of the address bar, allow "Clipboard", then turn this on again.',
   autoWatchUnsupported: 'This browser cannot read the clipboard — use the paste box below.',
   autoWatchAdded: (n) => `Auto-added ${n} chart${n === 1 ? '' : 's'}`,
+  autoWatchDeniedTitle: 'Cannot read clipboard',
+  noticeClose: 'Dismiss notification',
+  listSeparator: ', ',
 
   strategyPanel: '③ Pick a Strategy',
   requirementsTitle: 'Suggested requirements',

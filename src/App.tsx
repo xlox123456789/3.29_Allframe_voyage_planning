@@ -20,6 +20,8 @@ import {
   type ClipboardWatchStatus,
 } from './logic/useClipboardWatch'
 import { UI, type Lang } from './i18n'
+import { NoticeHost } from './NoticeHost'
+import { useNotices } from './logic/useNotices'
 import { BORDER_MODS, borderModById } from './data/mods'
 import { STRATEGIES, type StrategyDef, type StrategyRequirement } from './data/strategies'
 import './index.css'
@@ -458,7 +460,7 @@ export default function App() {
   const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
   const [lang, setLang] = useState<Lang>('zh')
   const [autoWatch, setAutoWatch] = useState<boolean>(loadAutoWatch)
-  const [autoAdded, setAutoAdded] = useState<number | null>(null)
+  const { notices, notify, dismiss } = useNotices()
   const progressTimer = useRef<number | null>(null)
   const t = UI[lang]
 
@@ -474,19 +476,34 @@ export default function App() {
 
   // 剪貼簿自動偵測：切回分頁時讀到的新內容，只要解析得出完整海圖就直接入庫；
   // 剪貼簿裡是別的東西（網址、聊天紀錄…）就安靜略過，不要跳錯誤嚇人。
-  const onClipboardText = useCallback((text: string) => {
-    const { charts: parsed } = parseChartText(text)
-    const usable = parsed.filter((c) => c.level > 0 && Boolean(c.shape))
-    if (usable.length === 0) return
-    setCharts((prev) => [...prev, ...usable])
-    setAutoAdded(usable.length)
-  }, [])
+  const onClipboardText = useCallback(
+    (text: string) => {
+      const { charts: parsed } = parseChartText(text)
+      const usable = parsed.filter((c) => c.level > 0 && Boolean(c.shape))
+      if (usable.length === 0) return
+      setCharts((prev) => [...prev, ...usable])
+      // 右上角跳通知，順便列出加了哪幾張，這樣切回分頁一眼就知道有沒有成功
+      notify('success', t.autoWatchAdded(usable.length), usable.map((c) => c.name).join(t.listSeparator))
+    },
+    [notify, t],
+  )
 
   const watchStatus = useClipboardWatch(autoWatch, onClipboardText)
 
+  // 權限被擋時也要講一聲，不然使用者會以為是自己沒複製到
+  const deniedNotified = useRef(false)
+  useEffect(() => {
+    if (!autoWatch || watchStatus !== 'denied') {
+      deniedNotified.current = false
+      return
+    }
+    if (deniedNotified.current) return
+    deniedNotified.current = true
+    notify('error', t.autoWatchDeniedTitle, t.autoWatchDenied)
+  }, [autoWatch, watchStatus, notify, t])
+
   /** 開啟時先在使用者的點擊手勢裡讀一次，權限提示才會正常跳出來 */
   async function toggleAutoWatch(on: boolean) {
-    setAutoAdded(null)
     if (on && clipboardWatchSupported()) {
       try {
         await navigator.clipboard.readText()
@@ -560,6 +577,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <NoticeHost notices={notices} onDismiss={dismiss} closeLabel={t.noticeClose} />
       <header>
         <div className="header-top">
           <div className="eyebrow">{t.eyebrow}</div>
@@ -631,7 +649,6 @@ export default function App() {
             autoWatch={autoWatch}
             onAutoWatchChange={toggleAutoWatch}
             watchStatus={watchStatus}
-            autoAdded={autoAdded}
           />
         </section>
       </div>
@@ -715,14 +732,12 @@ function ChartImporter({
   autoWatch,
   onAutoWatchChange,
   watchStatus,
-  autoAdded,
 }: {
   onImport: (charts: ChartData[]) => void
   lang: Lang
   autoWatch: boolean
   onAutoWatchChange: (on: boolean) => void
   watchStatus: ClipboardWatchStatus
-  autoAdded: number | null
 }) {
   const [text, setText] = useState('')
   // 存下「加了幾張、跳過哪些」而不是存已經拼好的句子，切語言時訊息才會跟著翻譯
@@ -784,9 +799,6 @@ function ChartImporter({
               ? t.autoWatchDenied
               : t.autoWatchHint}
         </div>
-        {autoWatch && autoAdded !== null && watchStatus === 'watching' && (
-          <div className="watch-added">✅ {t.autoWatchAdded(autoAdded)}</div>
-        )}
       </div>
     </div>
   )
