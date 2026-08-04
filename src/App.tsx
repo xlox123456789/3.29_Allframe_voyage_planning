@@ -6,6 +6,20 @@ import { parseChartText } from './logic/parser'
 import { solve, type SolverResult } from './logic/solver'
 import { rotateEdges } from './logic/connectivity'
 import { chartMatches } from './logic/chartMatching'
+import {
+  loadAutoWatch,
+  loadBorders,
+  loadCharts,
+  saveAutoWatch,
+  saveBorders,
+  saveCharts,
+} from './logic/storage'
+import {
+  clipboardWatchSupported,
+  useClipboardWatch,
+  type ClipboardWatchStatus,
+} from './logic/useClipboardWatch'
+import { UI, type Lang } from './i18n'
 import { BORDER_MODS, borderModById } from './data/mods'
 import { STRATEGIES, type StrategyDef, type StrategyRequirement } from './data/strategies'
 import './index.css'
@@ -29,7 +43,7 @@ function BorderPicker({
   value: string | null
   onChange: (v: string | null) => void
   align: 'top' | 'bottom' | 'left' | 'right'
-  lang: 'zh' | 'en'
+  lang: Lang
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -37,6 +51,8 @@ function BorderPicker({
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
+  const t = UI[lang]
   const mod = value ? borderModById.get(value) : null
   const labelOf = useCallback(
     (m: (typeof BORDER_MODS)[number]) => (lang === 'en' ? m.textEn ?? m.text : m.text),
@@ -89,6 +105,13 @@ function BorderPicker({
     }
   }, [open, updateDropdownPosition])
 
+  // 下拉選單第一次 render 時是 visibility: hidden（要先量完位置才顯示），而瀏覽器
+  // 不會 focus 一個 visibility: hidden 的元素，React 的 autoFocus 因此無聲失效，
+  // 使用者得再點一次搜尋框。改成等真的顯示出來之後自己 focus，點開就能直接打字。
+  useLayoutEffect(() => {
+    if (open && dropdownPosition.visible) searchRef.current?.focus()
+  }, [open, dropdownPosition.visible])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return BORDER_MODS
@@ -106,9 +129,9 @@ function BorderPicker({
       }}
     >
       <input
-        autoFocus
+        ref={searchRef}
         className="border-search"
-        placeholder={lang === 'en' ? 'Type to search…' : '輸入關鍵字快速搜尋…'}
+        placeholder={t.borderSearch}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
@@ -120,7 +143,7 @@ function BorderPicker({
             setOpen(false)
           }}
         >
-          {lang === 'en' ? '(clear / not rolled)' : '（清空邊界詞）'}
+          {t.borderClear}
         </div>
         {filtered.map((m) => (
           <div
@@ -135,7 +158,7 @@ function BorderPicker({
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="border-option empty">{lang === 'en' ? 'No matching border mod' : '找不到符合的邊界詞綴'}</div>
+          <div className="border-option empty">{t.borderNoMatch}</div>
         )}
       </div>
     </div>
@@ -151,9 +174,13 @@ function BorderPicker({
           setOpen((o) => !o)
           setQuery('')
         }}
-        title={mod ? labelOf(mod) : lang === 'en' ? 'Click to set this border' : '點擊設定這段邊界'}
+        title={mod ? labelOf(mod) : t.borderPillTitle}
       >
-        {mod ? (lang === 'en' ? mod.textEn ?? mod.short ?? mod.text : mod.short ?? mod.text) : lang === 'en' ? 'Not rolled' : '邊界詞'}
+        {mod
+          ? lang === 'en'
+            ? mod.textEn ?? mod.short ?? mod.text
+            : mod.short ?? mod.text
+          : t.borderPillEmpty}
       </button>
       {dropdown && createPortal(dropdown, document.body)}
     </div>
@@ -177,13 +204,15 @@ function ShapeIcon({ edges }: { edges: Edges }) {
   )
 }
 
-function chartHoverText(chart: ChartData): string {
+function chartHoverText(chart: ChartData, lang: Lang): string {
+  const t = UI[lang]
+  const sep = lang === 'en' ? ': ' : '：'
   const details = [chart.name]
-  if (chart.areaName) details.push(`區域：${chart.areaName}`)
-  details.push(`等級：${chart.level}`)
-  if (chart.shape) details.push(`形狀：${chart.shape}`)
-  if (chart.implicitText) details.push(`固定詞綴：${chart.implicitText}`)
-  details.push(chart.rawText ? `其他詞綴：\n${chart.rawText}` : '其他詞綴：未解析到其他詞綴')
+  if (chart.areaName) details.push(`${t.hoverArea}${sep}${chart.areaName}`)
+  details.push(`${t.hoverLevel}${sep}${chart.level}`)
+  if (chart.shape) details.push(`${t.hoverShape}${sep}${chart.shape}`)
+  if (chart.implicitText) details.push(`${t.hoverImplicit}${sep}${chart.implicitText}`)
+  details.push(chart.rawText ? `${t.hoverOther}${sep}\n${chart.rawText}` : t.hoverOtherNone)
   return details.join('\n')
 }
 
@@ -223,7 +252,7 @@ function VoyageBoard({
   onBorderChange: (seg: number, v: string | null) => void
   board: Board | null
   charts: Map<string, ChartData>
-  lang: 'zh' | 'en'
+  lang: Lang
 }) {
   const [copyNotice, setCopyNotice] = useState<{ chartUid: string; ok: boolean } | null>(null)
 
@@ -301,10 +330,10 @@ function VoyageBoard({
         row + 2,
         <div
           className={`cell ${chart ? 'filled' : ''} ${i === 6 ? 'start' : ''}`}
-          title={chart ? chartHoverText(chart) : undefined}
+          title={chart ? chartHoverText(chart, lang) : undefined}
           role={chart ? 'button' : undefined}
           tabIndex={chart ? 0 : undefined}
-          aria-label={chart ? `複製海圖名稱：${chart.name}` : undefined}
+          aria-label={chart ? UI[lang].copyChartAria(chart.name) : undefined}
           onClick={chart ? () => void copyChartName(chart) : undefined}
           onKeyDown={
             chart
@@ -323,12 +352,12 @@ function VoyageBoard({
               <div className="cell-name">{chart.name}</div>
               {copyNotice?.chartUid === chart.uid && (
                 <div className={`cell-copy-notice ${copyNotice.ok ? 'success' : 'error'}`} role="status">
-                  {copyNotice.ok ? '已複製' : '複製失敗'}
+                  {copyNotice.ok ? UI[lang].copied : UI[lang].copyFailed}
                 </div>
               )}
             </>
           ) : i === 6 ? (
-            <div className="cell-empty">⚓<span>起點</span></div>
+            <div className="cell-empty">⚓<span>{UI[lang].startCell}</span></div>
           ) : (
             <div className="cell-plus">＋</div>
           )}
@@ -348,34 +377,35 @@ function ChartLibrary({
   charts,
   onRemove,
   onClear,
+  lang,
 }: {
   charts: ChartData[]
   onRemove: (uid: string) => void
   onClear: () => void
+  lang: Lang
 }) {
+  const t = UI[lang]
   return (
     <div className="library">
       <div className="library-header">
-        <div>
-          <strong>{charts.length}</strong> 張可用海圖
-        </div>
+        <div>{t.chartsAvailable(charts.length)}</div>
         <button className="ghost-btn" onClick={onClear} disabled={charts.length === 0}>
-          清空倉庫
+          {t.clearLibrary}
         </button>
       </div>
       <div className="chart-list">
-        {charts.length === 0 && <div className="empty-hint">尚無海圖，貼上文字後按「加入倉庫」</div>}
+        {charts.length === 0 && <div className="empty-hint">{t.libraryEmpty}</div>}
         {charts.map((c) => (
           <div key={c.uid} className="chart-row">
             <ShapeIcon edges={c.edges} />
             <div className="chart-row-main">
               <div className="chart-row-name">{c.name}</div>
               <div className="chart-row-meta">
-                {c.shape ?? '形狀未知'} · 等級 {c.level}
+                {c.shape ?? t.unknownShape} · {t.chartLevel(c.level)}
                 {c.implicitText ? ` · ${c.implicitText}` : ''}
               </div>
             </div>
-            <button className="remove-btn" onClick={() => onRemove(c.uid)} title="移除">
+            <button className="remove-btn" onClick={() => onRemove(c.uid)} title={t.remove}>
               ✕
             </button>
           </div>
@@ -419,20 +449,68 @@ function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean 
 // App
 // ---------------------------------------------------------------------------
 export default function App() {
-  const [charts, setCharts] = useState<ChartData[]>([])
-  const [borders, setBorders] = useState<Borders>(emptyBorders())
+  // 倉庫與邊界從 localStorage 接續上次（見 logic/storage.ts）
+  const [charts, setCharts] = useState<ChartData[]>(loadCharts)
+  const [borders, setBorders] = useState<Borders>(loadBorders)
   const [result, setResult] = useState<SolverResult | null>(null)
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState(0)
   const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
-  const [lang, setLang] = useState<'zh' | 'en'>('zh')
+  const [lang, setLang] = useState<Lang>('zh')
+  const [autoWatch, setAutoWatch] = useState<boolean>(loadAutoWatch)
+  const [autoAdded, setAutoAdded] = useState<number | null>(null)
   const progressTimer = useRef<number | null>(null)
+  const t = UI[lang]
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
   const plannedChartUids = useMemo(
     () => new Set(result?.board.flatMap((placement) => (placement ? [placement.chartUid] : [])) ?? []),
     [result],
   )
+
+  useEffect(() => saveCharts(charts), [charts])
+  useEffect(() => saveBorders(borders), [borders])
+  useEffect(() => saveAutoWatch(autoWatch), [autoWatch])
+
+  // 剪貼簿自動偵測：切回分頁時讀到的新內容，只要解析得出完整海圖就直接入庫；
+  // 剪貼簿裡是別的東西（網址、聊天紀錄…）就安靜略過，不要跳錯誤嚇人。
+  const onClipboardText = useCallback((text: string) => {
+    const { charts: parsed } = parseChartText(text)
+    const usable = parsed.filter((c) => c.level > 0 && Boolean(c.shape))
+    if (usable.length === 0) return
+    setCharts((prev) => [...prev, ...usable])
+    setAutoAdded(usable.length)
+  }, [])
+
+  const watchStatus = useClipboardWatch(autoWatch, onClipboardText)
+
+  /** 開啟時先在使用者的點擊手勢裡讀一次，權限提示才會正常跳出來 */
+  async function toggleAutoWatch(on: boolean) {
+    setAutoAdded(null)
+    if (on && clipboardWatchSupported()) {
+      try {
+        await navigator.clipboard.readText()
+      } catch {
+        // 使用者拒絕或還沒授權都沒關係，狀態列會由 watchStatus 反映
+      }
+    }
+    setAutoWatch(on)
+  }
+
+  // index.html 的 <title> 是靜態的，切語言時同步一下分頁標題
+  useEffect(() => {
+    document.title = t.title
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant'
+  }, [t.title, lang])
+
+  const borderCount = borders.filter(Boolean).length
+
+  function clearCharts() {
+    if (charts.length === 0) return
+    if (!window.confirm(t.clearLibraryConfirm(charts.length))) return
+    setCharts([])
+    setResult(null)
+  }
 
   const borderOk = !strategy.requiresBorderId || borders.includes(strategy.requiresBorderId.id)
   const reqStates = (strategy.requirements ?? []).map((r) => ({ req: r, ok: requirementMet(r, charts) }))
@@ -484,7 +562,7 @@ export default function App() {
     <div className="app">
       <header>
         <div className="header-top">
-          <div className="eyebrow">PATH OF EXILE · 亡焰咒海</div>
+          <div className="eyebrow">{t.eyebrow}</div>
           <div className="lang-toggle">
             <button className={lang === 'zh' ? 'active' : ''} onClick={() => setLang('zh')}>
               中
@@ -494,16 +572,14 @@ export default function App() {
             </button>
           </div>
         </div>
-        <h1>亡焰咒海</h1>
-        <p className="subtitle">
-          設定 12 段外框邊界詞綴，貼上你的海圖倉庫，選擇策略後按「開始規劃」自動選出最佳九張並排出擺放方式。
-        </p>
+        <h1>{t.title}</h1>
+        <p className="subtitle">{t.subtitle}</p>
       </header>
 
       <div className="main-grid">
         <section className="panel board-panel">
           <h2>
-            ① 外框邊界詞綴 <span className="panel-sub">{borders.filter(Boolean).length} / 12 已設定</span>
+            {t.bordersPanel} <span className="panel-sub">{t.bordersSet(borderCount)}</span>
           </h2>
           <VoyageBoard
             borders={borders}
@@ -523,29 +599,45 @@ export default function App() {
               disabled={running || plannedChartUids.size === 0}
               onClick={quickDeletePlannedCharts}
             >
-              快速刪除
+              {t.quickDelete}
             </button>
-            <span>根據九宮格中的海圖，刪除倉庫裡相對應的九個海圖</span>
+            <button
+              className="quick-delete-btn subtle"
+              type="button"
+              onClick={() => setBorders(emptyBorders())}
+              disabled={borderCount === 0}
+            >
+              {t.clearBorders}
+            </button>
+            <span>{t.quickDeleteHint}</span>
           </div>
         </section>
 
         <section className="panel library-panel">
-          <h2>② 海圖倉庫</h2>
+          <h2>{t.libraryPanel}</h2>
           <ChartLibrary
             charts={charts}
             onRemove={(uid) => setCharts((prev) => prev.filter((c) => c.uid !== uid))}
-            onClear={() => setCharts([])}
+            onClear={clearCharts}
+            lang={lang}
           />
         </section>
 
         <section className="panel import-panel">
-          <h2>複製貼上區</h2>
-          <ChartImporter onImport={(cs) => setCharts((prev) => [...prev, ...cs])} lang={lang} />
+          <h2>{t.importPanel}</h2>
+          <ChartImporter
+            onImport={(cs) => setCharts((prev) => [...prev, ...cs])}
+            lang={lang}
+            autoWatch={autoWatch}
+            onAutoWatchChange={toggleAutoWatch}
+            watchStatus={watchStatus}
+            autoAdded={autoAdded}
+          />
         </section>
       </div>
 
       <section className="panel">
-        <h2>③ 選擇策略</h2>
+        <h2>{t.strategyPanel}</h2>
         <StrategyPicker selected={strategy} onSelect={setStrategy} />
         <p className="strategy-tagline">{strategy.tagline}</p>
         <ul className="guide-list">
@@ -556,11 +648,11 @@ export default function App() {
 
         {(strategy.requiresBorderId || reqStates.length > 0) && (
           <>
-            <div className="checklist-title">建議需求</div>
+            <div className="checklist-title">{t.requirementsTitle}</div>
             <ul className="checklist">
               {strategy.requiresBorderId && (
                 <li className={borderOk ? 'ok' : 'bad'}>
-                  {borderOk ? '✅' : '❌'} 已擲出{strategy.requiresBorderId.label}
+                  {borderOk ? '✅' : '❌'} {t.rolled(strategy.requiresBorderId.label)}
                 </li>
               )}
               {reqStates.map(({ req, ok }, i) => (
@@ -576,7 +668,7 @@ export default function App() {
 
       <section className="panel">
         <button className="solve-btn" disabled={charts.length === 0 || running} onClick={runSolver}>
-          {running ? '規劃中…' : '開始規劃'}
+          {running ? t.solving : t.solve}
         </button>
         {running && (
           <div className="progress-wrap">
@@ -587,9 +679,7 @@ export default function App() {
           </div>
         )}
         {!running && result && (
-          <div className="result-meta">
-            分數：{result.reward.toFixed(1)}　{result.valid ? '✅ 航道可行' : '⚠️ 航道有問題（接口未接上或有格子空白）'}
-          </div>
+          <div className="result-meta">{t.result(result.reward.toFixed(1), result.valid)}</div>
         )}
       </section>
 
@@ -601,14 +691,14 @@ export default function App() {
             target="_blank"
             rel="noreferrer"
           >
-            GITHUB頁面
+            {t.githubLink}
           </a>
           <a
             href="https://github.com/xlox123456789/3.29_Allframe_voyage_planning/discussions"
             target="_blank"
             rel="noreferrer"
           >
-            意見反饋區
+            {t.feedbackLink}
           </a>
         </div>
       </footer>
@@ -622,21 +712,27 @@ export default function App() {
 function ChartImporter({
   onImport,
   lang,
+  autoWatch,
+  onAutoWatchChange,
+  watchStatus,
+  autoAdded,
 }: {
   onImport: (charts: ChartData[]) => void
-  lang: 'zh' | 'en'
+  lang: Lang
+  autoWatch: boolean
+  onAutoWatchChange: (on: boolean) => void
+  watchStatus: ClipboardWatchStatus
+  autoAdded: number | null
 }) {
   const [text, setText] = useState('')
-  const [msg, setMsg] = useState<string | null>(null)
+  // 存下「加了幾張、跳過哪些」而不是存已經拼好的句子，切語言時訊息才會跟著翻譯
+  const [msg, setMsg] = useState<{ auto: boolean; added: number; skipped: string[] } | null>(null)
+  const t = UI[lang]
 
   return (
     <div className="library">
       <textarea
-        placeholder={
-          lang === 'en'
-            ? 'Ctrl+V paste a Chart (Ctrl+C in-game).'
-            : 'Ctrl+V 貼上海圖（遊戲內 Ctrl+C 複製）'
-        }
+        placeholder={t.importPlaceholder}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onPaste={(e) => {
@@ -649,10 +745,7 @@ function ChartImporter({
           e.preventDefault()
           onImport(cs)
           setText('')
-          setMsg(
-            '已自動加入 1 張' +
-              (rejected.length ? `，跳過 ${rejected.length} 項（${rejected.map((r) => r.reason).join('；')}）` : ''),
-          )
+          setMsg({ auto: true, added: cs.length, skipped: rejected.map((r) => r.reason) })
         }}
         rows={10}
       />
@@ -662,16 +755,39 @@ function ChartImporter({
           const { charts: cs, rejected } = parseChartText(text)
           onImport(cs)
           setText('')
-          setMsg(
-            `已加入 ${cs.length} 張` +
-              (rejected.length ? `，跳過 ${rejected.length} 項（${rejected.map((r) => r.reason).join('；')}）` : ''),
-          )
+          setMsg({ auto: false, added: cs.length, skipped: rejected.map((r) => r.reason) })
         }}
         disabled={!text.trim()}
       >
-        加入倉庫
+        {t.addToLibrary}
       </button>
-      {msg && <div className="import-msg">{msg}</div>}
+      {msg && (
+        <div className="import-msg">
+          {msg.auto ? t.importedAuto(msg.added, msg.skipped) : t.imported(msg.added, msg.skipped)}
+        </div>
+      )}
+
+      <div className="watch-box">
+        <label className="watch-toggle">
+          <input
+            type="checkbox"
+            checked={autoWatch}
+            disabled={watchStatus === 'unsupported'}
+            onChange={(e) => onAutoWatchChange(e.target.checked)}
+          />
+          <span>{t.autoWatch}</span>
+        </label>
+        <div className="watch-hint">
+          {watchStatus === 'unsupported'
+            ? t.autoWatchUnsupported
+            : autoWatch && watchStatus === 'denied'
+              ? t.autoWatchDenied
+              : t.autoWatchHint}
+        </div>
+        {autoWatch && autoAdded !== null && watchStatus === 'watching' && (
+          <div className="watch-added">✅ {t.autoWatchAdded(autoAdded)}</div>
+        )}
+      </div>
     </div>
   )
 }

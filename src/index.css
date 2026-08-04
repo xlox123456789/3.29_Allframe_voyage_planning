@@ -109,6 +109,9 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 }
 .quick-delete-btn:hover:not(:disabled) { background: #3b211d; border-color: #a85b4f; }
 .quick-delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* 清空邊界跟快速刪除同一排，但它不刪海圖，用中性色不要搶紅色警示 */
+.quick-delete-btn.subtle { border-color: #253a2c; background: #0c1510; color: #9db3a4; }
+.quick-delete-btn.subtle:hover:not(:disabled) { background: #12201a; border-color: #3d5142; }
 
 /* ---------------------------------------------------------------------- */
 /* 九宮格 + 對齊邊界（5x5 grid：外圈是邊界，中間 3x3 是海圖格） */
@@ -266,6 +269,25 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 .ghost-btn:hover:not(:disabled) { border-color: #3d5142; }
 .ghost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .import-msg { margin-top: 8px; font-size: 12px; color: #7f9587; }
+
+/* 剪貼簿自動偵測 */
+.watch-box {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #1e2b21;
+}
+.watch-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #dfe8e0;
+  cursor: pointer;
+}
+.watch-toggle input { accent-color: #5bb0c9; width: 15px; height: 15px; cursor: pointer; }
+.watch-toggle:has(input:disabled) { color: #4a5c50; cursor: not-allowed; }
+.watch-hint { margin-top: 6px; font-size: 11px; line-height: 1.6; color: #6b8072; }
+.watch-added { margin-top: 6px; font-size: 12px; color: #6fd18a; }
 
 .chart-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto; }
 .empty-hint { font-size: 12px; color: #4a5c50; padding: 12px 0; }
