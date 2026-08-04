@@ -32,7 +32,7 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 
 .main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 13fr) minmax(0, 9fr) minmax(0, 9fr);
+  grid-template-columns: minmax(0, 14fr) minmax(0, 9fr) minmax(0, 8fr);
   grid-template-areas: "board library import";
   gap: 16px;
   align-items: start;
@@ -42,13 +42,14 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 }
 @media (min-width: 1100px) and (max-width: 1499px) {
   .main-grid {
-    grid-template-columns: minmax(0, 13fr) minmax(0, 9fr);
+    grid-template-columns: minmax(0, 14fr) minmax(0, 9fr);
     grid-template-areas:
       "board library"
       "board import";
-    max-width: 1116px;
+    max-width: 1166px;
   }
   .main-grid .panel { width: 100%; }
+  .main-grid .import-panel { width: 88.8889%; }
 }
 @media (max-width: 1099px) {
   .main-grid {
