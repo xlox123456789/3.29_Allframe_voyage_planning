@@ -32,17 +32,17 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 
 .main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr) minmax(0, 5fr);
+  grid-template-columns: minmax(0, 13fr) minmax(0, 9fr) minmax(0, 9fr);
   grid-template-areas: "board library import";
   gap: 16px;
   align-items: start;
   justify-content: start;
   width: 100%;
-  max-width: 1632px;
+  max-width: 1582px;
 }
-@media (min-width: 1100px) and (max-width: 1599px) {
+@media (min-width: 1100px) and (max-width: 1499px) {
   .main-grid {
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    grid-template-columns: minmax(0, 13fr) minmax(0, 9fr);
     grid-template-areas:
       "board library"
       "board import";
