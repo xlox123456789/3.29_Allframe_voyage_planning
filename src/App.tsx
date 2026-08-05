@@ -429,6 +429,25 @@ function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean 
 }
 
 const SAVED_TEXT_STORAGE_KEY = 'voyage-saved-texts-v1'
+const LANGUAGE_STORAGE_KEY = 'voyage-language-v1'
+const THEME_STORAGE_KEY = 'voyage-theme-v1'
+
+function loadLanguage(): 'zh' | 'en' {
+  try {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'en' ? 'en' : 'zh'
+  } catch {
+    return 'zh'
+  }
+}
+
+function loadTheme(): 'green' | 'black' | 'white' {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY)
+    return stored === 'black' || stored === 'white' ? stored : 'green'
+  } catch {
+    return 'green'
+  }
+}
 
 function loadSavedTexts(): string[] {
   try {
@@ -503,12 +522,25 @@ export default function App() {
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState(0)
   const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
-  const [lang, setLang] = useState<'zh' | 'en'>('zh')
-  const [theme, setTheme] = useState<'green' | 'black' | 'white'>('green')
+  const [lang, setLang] = useState<'zh' | 'en'>(loadLanguage)
+  const [theme, setTheme] = useState<'green' | 'black' | 'white'>(loadTheme)
   const progressTimer = useRef<number | null>(null)
 
   useEffect(() => {
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, lang)
+    } catch {
+      // 瀏覽器停用本機儲存時，語言仍可在本次開啟期間切換。
+    }
+  }, [lang])
+
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme)
+    } catch {
+      // 瀏覽器停用本機儲存時，主題仍可在本次開啟期間切換。
+    }
   }, [theme])
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
