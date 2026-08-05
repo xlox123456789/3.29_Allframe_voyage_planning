@@ -15,7 +15,8 @@ body {
 }
 
 header { margin-bottom: 22px; }
-.header-top { display: flex; align-items: center; justify-content: space-between; }
+.header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.header-copy { flex: 1; min-width: 0; }
 .header-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .lang-toggle,
 .theme-toggle { display: flex; gap: 4px; background: #0a120e; border: 1px solid #1e2b21; border-radius: 999px; padding: 3px; }
@@ -34,7 +35,7 @@ header { margin-bottom: 22px; }
 .theme-toggle button.active { background: #0d1e22; color: #cfeaf2; font-weight: 600; }
 .eyebrow { font-size: 12px; letter-spacing: 2px; color: #5bb0c9; margin-bottom: 6px; }
 header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; }
-.subtitle { color: #7f9587; font-size: 14px; margin: 0 0 8px; max-width: 640px; }
+.subtitle { color: #7f9587; font-size: 14px; margin: 0; max-width: 900px; }
 .strategy-badge { color: #5bb0c9; font-size: 13px; }
 
 .main-grid {

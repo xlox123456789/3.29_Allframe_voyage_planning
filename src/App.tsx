@@ -510,7 +510,13 @@ export default function App() {
     <div className="app">
       <header>
         <div className="header-top">
-          <div className="eyebrow">PATH OF EXILE · 亡焰咒海</div>
+          <div className="header-copy">
+            <div className="eyebrow">PATH OF EXILE · 亡焰咒海</div>
+            <h1>亡焰咒海</h1>
+            <p className="subtitle">
+              設定 12 段外框邊界詞綴，貼上你的海圖倉庫，選擇策略後按「開始規劃」自動選出最佳九張並排出擺放方式。
+            </p>
+          </div>
           <div className="header-controls">
             <div className="lang-toggle">
               <button className={lang === 'zh' ? 'active' : ''} onClick={() => setLang('zh')}>
@@ -533,10 +539,6 @@ export default function App() {
             </div>
           </div>
         </div>
-        <h1>亡焰咒海</h1>
-        <p className="subtitle">
-          設定 12 段外框邊界詞綴，貼上你的海圖倉庫，選擇策略後按「開始規劃」自動選出最佳九張並排出擺放方式。
-        </p>
       </header>
 
       <div className="main-grid">
