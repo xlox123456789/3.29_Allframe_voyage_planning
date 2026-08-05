@@ -492,17 +492,32 @@ html[data-theme='white'] .quick-delete-btn { background: #fff2ef; border-color: 
 html[data-theme='white'] .quick-delete-btn:hover:not(:disabled) { background: #ffe6e1; border-color: #b85d50; }
 html[data-theme='white'] .site-footer { border-color: #d5ddd7; }
 
-/* 已被規劃進九宮格的海圖，在所有主題下都使用一致的高亮色。 */
+/* 已被規劃進九宮格的海圖：深色主題使用深藍底白字。 */
 .library .chart-row.selected {
+  background: #103f58;
+  border-color: #5bb0c9;
+  box-shadow: inset 3px 0 0 #8ed8ee;
+}
+.library .chart-row.selected .chart-row-name,
+.library .chart-row.selected .chart-row-meta,
+.library .chart-row.selected .remove-btn { color: #f4fbff; }
+.library .chart-row.selected .shape-icon rect { fill: #0a3043; stroke: #9bdff3; }
+.library .chart-row.selected .shape-icon line { stroke: #9bbbc7; }
+.library .chart-row.selected .shape-icon line.on,
+.library .chart-row.selected .shape-icon circle.on { stroke: #f4fbff; fill: #f4fbff; }
+.library .chart-row.selected .shape-icon circle.off { fill: #86a5b1; }
+
+/* 白色主題維持淺藍底黑字。 */
+html[data-theme='white'] .library .chart-row.selected {
   background: #bfeaff;
   border-color: #4a9fbd;
   box-shadow: inset 3px 0 0 #187d99;
 }
-.library .chart-row.selected .chart-row-name,
-.library .chart-row.selected .chart-row-meta,
-.library .chart-row.selected .remove-btn { color: #07131a; }
-.library .chart-row.selected .shape-icon rect { fill: #dff5ff; stroke: #2b718a; }
-.library .chart-row.selected .shape-icon line { stroke: #18343e; }
-.library .chart-row.selected .shape-icon line.on,
-.library .chart-row.selected .shape-icon circle.on { stroke: #07131a; fill: #07131a; }
-.library .chart-row.selected .shape-icon circle.off { fill: #5c7b87; }
+html[data-theme='white'] .library .chart-row.selected .chart-row-name,
+html[data-theme='white'] .library .chart-row.selected .chart-row-meta,
+html[data-theme='white'] .library .chart-row.selected .remove-btn { color: #07131a; }
+html[data-theme='white'] .library .chart-row.selected .shape-icon rect { fill: #dff5ff; stroke: #2b718a; }
+html[data-theme='white'] .library .chart-row.selected .shape-icon line { stroke: #18343e; }
+html[data-theme='white'] .library .chart-row.selected .shape-icon line.on,
+html[data-theme='white'] .library .chart-row.selected .shape-icon circle.on { stroke: #07131a; fill: #07131a; }
+html[data-theme='white'] .library .chart-row.selected .shape-icon circle.off { fill: #5c7b87; }
