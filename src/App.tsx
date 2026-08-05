@@ -437,7 +437,12 @@ export default function App() {
   const [progress, setProgress] = useState(0)
   const [strategy, setStrategy] = useState<StrategyDef>(STRATEGIES[0])
   const [lang, setLang] = useState<'zh' | 'en'>('zh')
+  const [theme, setTheme] = useState<'green' | 'black' | 'white'>('green')
   const progressTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
 
   const chartMap = useMemo(() => new Map(charts.map((c) => [c.uid, c])), [charts])
   const plannedChartUids = useMemo(
@@ -496,18 +501,36 @@ export default function App() {
     setResult(null)
   }
 
+  function clearBorders() {
+    setBorders(emptyBorders())
+    setResult(null)
+  }
+
   return (
     <div className="app">
       <header>
         <div className="header-top">
           <div className="eyebrow">PATH OF EXILE · 亡焰咒海</div>
-          <div className="lang-toggle">
-            <button className={lang === 'zh' ? 'active' : ''} onClick={() => setLang('zh')}>
-              中
-            </button>
-            <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>
-              EN
-            </button>
+          <div className="header-controls">
+            <div className="lang-toggle">
+              <button className={lang === 'zh' ? 'active' : ''} onClick={() => setLang('zh')}>
+                中
+              </button>
+              <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>
+                EN
+              </button>
+            </div>
+            <div className="theme-toggle" aria-label="主題顏色">
+              <button className={theme === 'green' ? 'active' : ''} onClick={() => setTheme('green')}>
+                綠
+              </button>
+              <button className={theme === 'black' ? 'active' : ''} onClick={() => setTheme('black')}>
+                黑
+              </button>
+              <button className={theme === 'white' ? 'active' : ''} onClick={() => setTheme('white')}>
+                白
+              </button>
+            </div>
           </div>
         </div>
         <h1>亡焰咒海</h1>
@@ -542,6 +565,16 @@ export default function App() {
               快速刪除
             </button>
             <span>根據九宮格中的海圖，刪除倉庫裡相對應的九個海圖</span>
+          </div>
+          <div className="board-clear-borders">
+            <button
+              className="clear-borders-btn"
+              type="button"
+              disabled={running || borders.every((border) => !border)}
+              onClick={clearBorders}
+            >
+              清空邊界
+            </button>
           </div>
         </section>
 
