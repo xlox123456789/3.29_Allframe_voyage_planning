@@ -491,3 +491,18 @@ html[data-theme='white'] .clear-borders-btn:hover:not(:disabled) { border-color:
 html[data-theme='white'] .quick-delete-btn { background: #fff2ef; border-color: #d6a097; color: #9b4438; }
 html[data-theme='white'] .quick-delete-btn:hover:not(:disabled) { background: #ffe6e1; border-color: #b85d50; }
 html[data-theme='white'] .site-footer { border-color: #d5ddd7; }
+
+/* 已被規劃進九宮格的海圖，在所有主題下都使用一致的高亮色。 */
+.library .chart-row.selected {
+  background: #bfeaff;
+  border-color: #4a9fbd;
+  box-shadow: inset 3px 0 0 #187d99;
+}
+.library .chart-row.selected .chart-row-name,
+.library .chart-row.selected .chart-row-meta,
+.library .chart-row.selected .remove-btn { color: #07131a; }
+.library .chart-row.selected .shape-icon rect { fill: #dff5ff; stroke: #2b718a; }
+.library .chart-row.selected .shape-icon line { stroke: #18343e; }
+.library .chart-row.selected .shape-icon line.on,
+.library .chart-row.selected .shape-icon circle.on { stroke: #07131a; fill: #07131a; }
+.library .chart-row.selected .shape-icon circle.off { fill: #5c7b87; }

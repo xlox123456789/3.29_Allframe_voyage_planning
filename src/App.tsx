@@ -357,10 +357,12 @@ function VoyageBoard({
 // ---------------------------------------------------------------------------
 function ChartLibrary({
   charts,
+  selectedUids,
   onRemove,
   onClear,
 }: {
   charts: ChartData[]
+  selectedUids: ReadonlySet<string>
   onRemove: (uid: string) => void
   onClear: () => void
 }) {
@@ -377,7 +379,7 @@ function ChartLibrary({
       <div className="chart-list">
         {charts.length === 0 && <div className="empty-hint">尚無海圖，貼上文字後按「加入倉庫」</div>}
         {charts.map((c) => (
-          <div key={c.uid} className="chart-row">
+          <div key={c.uid} className={`chart-row ${selectedUids.has(c.uid) ? 'selected' : ''}`}>
             <ShapeIcon edges={c.edges} />
             <div className="chart-row-main">
               <div className="chart-row-name">{c.name}</div>
@@ -584,6 +586,7 @@ export default function App() {
           <h2>② 海圖倉庫</h2>
           <ChartLibrary
             charts={charts}
+            selectedUids={plannedChartUids}
             onRemove={(uid) => setCharts((prev) => prev.filter((c) => c.uid !== uid))}
             onClear={() => setCharts([])}
           />
