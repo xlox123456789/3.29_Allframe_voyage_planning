@@ -428,6 +428,71 @@ function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean 
   return count >= req.count
 }
 
+const SAVED_TEXT_STORAGE_KEY = 'voyage-saved-texts-v1'
+
+function loadSavedTexts(): string[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(SAVED_TEXT_STORAGE_KEY) ?? '[]')
+    return Array.from({ length: 4 }, (_, index) => (typeof stored[index] === 'string' ? stored[index] : ''))
+  } catch {
+    return ['', '', '', '']
+  }
+}
+
+function SavedTextTools() {
+  const [texts, setTexts] = useState<string[]>(loadSavedTexts)
+  const [copyNotice, setCopyNotice] = useState<{ index: number; ok: boolean } | null>(null)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SAVED_TEXT_STORAGE_KEY, JSON.stringify(texts))
+    } catch {
+      // 瀏覽器停用本機儲存時仍可輸入與複製，只是不保留到下次開啟。
+    }
+  }, [texts])
+
+  useEffect(() => {
+    if (!copyNotice) return
+    const timer = window.setTimeout(() => setCopyNotice(null), 1400)
+    return () => window.clearTimeout(timer)
+  }, [copyNotice])
+
+  async function copySavedText(index: number) {
+    try {
+      await copyTextToClipboard(texts[index])
+      setCopyNotice({ index, ok: true })
+    } catch {
+      setCopyNotice({ index, ok: false })
+    }
+  }
+
+  return (
+    <div className="saved-text-panel">
+      <h3>儲存文字區</h3>
+      <p>可快速複製一堆字，輸入後 F5 也不會消失。</p>
+      <div className="saved-text-rows">
+        {texts.map((text, index) => (
+          <div className="saved-text-row" key={index}>
+            <button type="button" disabled={!text} onClick={() => void copySavedText(index)}>
+              {copyNotice?.index === index ? (copyNotice.ok ? '已複製' : '失敗') : '複製'}
+            </button>
+            <input
+              type="text"
+              value={text}
+              aria-label={`儲存文字 ${index + 1}`}
+              onChange={(event) => {
+                const next = [...texts]
+                next[index] = event.target.value
+                setTexts(next)
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // App
 // ---------------------------------------------------------------------------
@@ -645,6 +710,11 @@ export default function App() {
             分數：{result.reward.toFixed(1)}　{result.valid ? '✅ 航道可行' : '⚠️ 航道有問題（接口未接上或有格子空白）'}
           </div>
         )}
+      </section>
+
+      <section className="panel extra-features-panel">
+        <h2>額外功能</h2>
+        <SavedTextTools />
       </section>
 
       <footer className="site-footer">

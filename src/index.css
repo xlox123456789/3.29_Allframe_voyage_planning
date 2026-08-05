@@ -354,6 +354,51 @@ header h1 { font-size: 30px; margin: 0 0 8px; font-weight: 600; color: #eef4ee; 
 .progress-pct { font-size: 12px; color: #7f9587; min-width: 34px; text-align: right; }
 .result-meta { margin-top: 10px; font-size: 14px; color: #dfe8e0; }
 
+/* ---------------------------------------------------------------------- */
+/* 額外功能：重新整理後仍保留的快速複製文字 */
+/* ---------------------------------------------------------------------- */
+.saved-text-panel {
+  width: min(100%, 640px);
+  padding: 16px;
+  border: 1px solid #253a2c;
+  border-radius: 8px;
+  background: #0a120d;
+}
+.saved-text-panel h3 { margin: 0 0 6px; color: #dfe8e0; font-size: 14px; }
+.saved-text-panel p { margin: 0 0 14px; color: #7f9587; font-size: 12px; }
+.saved-text-rows { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.saved-text-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 500px);
+  justify-content: start;
+  gap: 12px;
+  width: 100%;
+}
+.saved-text-row button {
+  height: 36px;
+  border: 1px solid #3d5142;
+  border-radius: 6px;
+  background: #0d1e22;
+  color: #cfeaf2;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.saved-text-row button:hover:not(:disabled) { border-color: #5bb0c9; background: #17313a; }
+.saved-text-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+.saved-text-row input {
+  width: 100%;
+  height: 36px;
+  padding: 7px 10px;
+  border: 1px solid #253a2c;
+  border-radius: 6px;
+  outline: none;
+  background: #0f1712;
+  color: #dfe8e0;
+  font-size: 13px;
+}
+.saved-text-row input:focus { border-color: #5bb0c9; box-shadow: 0 0 0 2px rgba(91, 176, 201, 0.15); }
+
 .site-footer {
   margin-top: 28px;
   padding-top: 18px;
@@ -415,6 +460,11 @@ html[data-theme='black'] .strategy-tab,
 html[data-theme='black'] .guide-list,
 html[data-theme='black'] .border-option { color: #c8c8c8; }
 html[data-theme='black'] .site-footer { border-color: #2b2b2b; }
+html[data-theme='black'] .saved-text-panel,
+html[data-theme='black'] .saved-text-row input { background: #090909; border-color: #343434; }
+html[data-theme='black'] .saved-text-row button { background: #242424; border-color: #444; color: #ededed; }
+html[data-theme='black'] .saved-text-panel h3,
+html[data-theme='black'] .saved-text-row input { color: #ededed; }
 
 /* ---------------------------------------------------------------------- */
 /* 白色主題 */
@@ -491,6 +541,12 @@ html[data-theme='white'] .clear-borders-btn:hover:not(:disabled) { border-color:
 html[data-theme='white'] .quick-delete-btn { background: #fff2ef; border-color: #d6a097; color: #9b4438; }
 html[data-theme='white'] .quick-delete-btn:hover:not(:disabled) { background: #ffe6e1; border-color: #b85d50; }
 html[data-theme='white'] .site-footer { border-color: #d5ddd7; }
+html[data-theme='white'] .saved-text-panel { background: #f7faf8; border-color: #d2ddd5; }
+html[data-theme='white'] .saved-text-panel h3 { color: #172018; }
+html[data-theme='white'] .saved-text-panel p { color: #5d6d62; }
+html[data-theme='white'] .saved-text-row input { background: #fff; border-color: #cbd7ce; color: #172018; }
+html[data-theme='white'] .saved-text-row button { background: #dceff5; border-color: #7eb6c7; color: #105d74; }
+html[data-theme='white'] .saved-text-row button:hover:not(:disabled) { background: #cce7ef; border-color: #187d99; }
 
 /* 已被規劃進九宮格的海圖：深色主題使用深藍底白字。 */
 .library .chart-row.selected {
