@@ -479,6 +479,7 @@ function SavedTextTools() {
   async function copySavedText(index: number) {
     try {
       await copyTextToClipboard(texts[index])
+      trackGaEvent('TXT_copy_success', { txt_content: texts[index] })
       setCopyNotice({ index, ok: true })
     } catch {
       setCopyNotice({ index, ok: false })
