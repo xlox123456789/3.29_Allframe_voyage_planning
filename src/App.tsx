@@ -429,8 +429,25 @@ function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean 
 }
 
 const SAVED_TEXT_STORAGE_KEY = 'voyage-saved-texts-v1'
+const SAVED_LINK_STORAGE_KEY = 'voyage-saved-links-v1'
 const LANGUAGE_STORAGE_KEY = 'voyage-language-v1'
 const THEME_STORAGE_KEY = 'voyage-theme-v1'
+const DEFAULT_SAVED_TEXT = '稀有怪物|掉落裝備|拉安|洋之|保險箱'
+const DEFAULT_SAVED_LINKS = [
+  {
+    label: '海圖購買',
+    url: 'https://www.pathofexile.com/trade/search/Allflame/eRDeDPboIL',
+  },
+  {
+    label: '海洋之柱',
+    url: 'https://www.pathofexile.com/trade/search/Allflame/bGDa0pPLuL',
+  },
+]
+
+type SavedLink = {
+  label: string
+  url: string
+}
 
 function loadLanguage(): 'zh' | 'en' {
   try {
@@ -452,9 +469,23 @@ function loadTheme(): 'green' | 'black' | 'white' {
 function loadSavedTexts(): string[] {
   try {
     const stored = JSON.parse(localStorage.getItem(SAVED_TEXT_STORAGE_KEY) ?? '[]')
-    return Array.from({ length: 4 }, (_, index) => (typeof stored[index] === 'string' ? stored[index] : ''))
+    return Array.from({ length: 5 }, (_, index) =>
+      typeof stored[index] === 'string' ? stored[index] : index === 4 ? DEFAULT_SAVED_TEXT : '',
+    )
   } catch {
-    return ['', '', '', '']
+    return ['', '', '', '', DEFAULT_SAVED_TEXT]
+  }
+}
+
+function loadSavedLinks(): SavedLink[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(SAVED_LINK_STORAGE_KEY) ?? '[]')
+    return DEFAULT_SAVED_LINKS.map((fallback, index) => ({
+      label: typeof stored[index]?.label === 'string' ? stored[index].label : fallback.label,
+      url: typeof stored[index]?.url === 'string' ? stored[index].url : fallback.url,
+    }))
+  } catch {
+    return DEFAULT_SAVED_LINKS.map((link) => ({ ...link }))
   }
 }
 
@@ -505,6 +536,68 @@ function SavedTextTools() {
                 next[index] = event.target.value
                 setTexts(next)
               }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function SavedLinkTools() {
+  const [links, setLinks] = useState<SavedLink[]>(loadSavedLinks)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SAVED_LINK_STORAGE_KEY, JSON.stringify(links))
+    } catch {
+      // 瀏覽器停用本機儲存時仍可編輯與開啟連結，只是不保留到下次開啟。
+    }
+  }, [links])
+
+  function updateLink(index: number, field: keyof SavedLink, value: string) {
+    setLinks((current) =>
+      current.map((link, linkIndex) => (linkIndex === index ? { ...link, [field]: value } : link)),
+    )
+  }
+
+  function openSavedLink(link: SavedLink) {
+    const trimmed = link.url.trim()
+    if (!trimmed) return
+    const target = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    trackGaEvent('go_to_link_click', {
+      link_content: link.label,
+      link_url: target,
+    })
+    window.open(target, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <div className="saved-link-panel">
+      <h3>連結儲存區</h3>
+      <p>儲存常用頁面，名稱與網址輸入後 F5 也不會消失。</p>
+      <div className="saved-link-rows">
+        {links.map((link, index) => (
+          <div className="saved-link-row" key={index}>
+            <button type="button" disabled={!link.url.trim()} onClick={() => openSavedLink(link)}>
+              前往
+            </button>
+            <input
+              className="saved-link-label"
+              type="text"
+              maxLength={50}
+              value={link.label}
+              aria-label={`連結用途 ${index + 1}`}
+              placeholder="在幹嘛"
+              onChange={(event) => updateLink(index, 'label', event.target.value)}
+            />
+            <input
+              className="saved-link-url"
+              type="url"
+              value={link.url}
+              aria-label={`連結網址 ${index + 1}`}
+              placeholder="https://"
+              onChange={(event) => updateLink(index, 'url', event.target.value)}
             />
           </div>
         ))}
@@ -747,7 +840,10 @@ export default function App() {
 
       <section className="panel extra-features-panel">
         <h2>額外功能</h2>
-        <SavedTextTools />
+        <div className="extra-tools-grid">
+          <SavedTextTools />
+          <SavedLinkTools />
+        </div>
       </section>
 
       <footer className="site-footer">
