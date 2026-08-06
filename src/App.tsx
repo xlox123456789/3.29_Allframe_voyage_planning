@@ -434,6 +434,9 @@ const LANGUAGE_STORAGE_KEY = 'voyage-language-v1'
 const THEME_STORAGE_KEY = 'voyage-theme-v1'
 const DEFAULT_SAVED_TEXT = '稀有怪物|掉落裝備|拉安|洋之|保險箱'
 const DEFAULT_SAVED_LINKS = [
+  { label: '', url: '' },
+  { label: '', url: '' },
+  { label: '', url: '' },
   {
     label: '海圖購買',
     url: 'https://www.pathofexile.com/trade/search/Allflame/eRDeDPboIL',
@@ -480,9 +483,10 @@ function loadSavedTexts(): string[] {
 function loadSavedLinks(): SavedLink[] {
   try {
     const stored = JSON.parse(localStorage.getItem(SAVED_LINK_STORAGE_KEY) ?? '[]')
+    const savedLinks = Array.isArray(stored) && stored.length === 2 ? [{}, {}, {}, ...stored] : stored
     return DEFAULT_SAVED_LINKS.map((fallback, index) => ({
-      label: typeof stored[index]?.label === 'string' ? stored[index].label : fallback.label,
-      url: typeof stored[index]?.url === 'string' ? stored[index].url : fallback.url,
+      label: typeof savedLinks[index]?.label === 'string' ? savedLinks[index].label : fallback.label,
+      url: typeof savedLinks[index]?.url === 'string' ? savedLinks[index].url : fallback.url,
     }))
   } catch {
     return DEFAULT_SAVED_LINKS.map((link) => ({ ...link }))
