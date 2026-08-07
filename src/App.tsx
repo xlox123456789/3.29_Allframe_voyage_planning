@@ -430,6 +430,8 @@ function requirementMet(req: StrategyRequirement, charts: ChartData[]): boolean 
 
 const SAVED_TEXT_STORAGE_KEY = 'voyage-saved-texts-v1'
 const SAVED_LINK_STORAGE_KEY = 'voyage-saved-links-v1'
+const CHARTS_STORAGE_KEY = 'voyage-charts-v1'
+const BORDERS_STORAGE_KEY = 'voyage-borders-v1'
 const LANGUAGE_STORAGE_KEY = 'voyage-language-v1'
 const THEME_STORAGE_KEY = 'voyage-theme-v1'
 const DEFAULT_SAVED_TEXT = '稀有怪物|掉落裝備|拉安|洋之|保險箱'
@@ -490,6 +492,24 @@ function loadSavedLinks(): SavedLink[] {
     }))
   } catch {
     return DEFAULT_SAVED_LINKS.map((link) => ({ ...link }))
+  }
+}
+
+function loadCharts(): ChartData[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CHARTS_STORAGE_KEY) ?? '[]')
+    return Array.isArray(stored) ? stored : []
+  } catch {
+    return []
+  }
+}
+
+function loadBorders(): Borders {
+  try {
+    const stored = JSON.parse(localStorage.getItem(BORDERS_STORAGE_KEY) ?? '[]')
+    return Array.from({ length: 12 }, (_, index) => (typeof stored[index] === 'string' ? stored[index] : null))
+  } catch {
+    return emptyBorders()
   }
 }
 
@@ -614,8 +634,8 @@ function SavedLinkTools() {
 // App
 // ---------------------------------------------------------------------------
 export default function App() {
-  const [charts, setCharts] = useState<ChartData[]>([])
-  const [borders, setBorders] = useState<Borders>(emptyBorders())
+  const [charts, setCharts] = useState<ChartData[]>(loadCharts)
+  const [borders, setBorders] = useState<Borders>(loadBorders)
   const [result, setResult] = useState<SolverResult | null>(null)
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -631,6 +651,18 @@ export default function App() {
       // 瀏覽器停用本機儲存時，語言仍可在本次開啟期間切換。
     }
   }, [lang])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHARTS_STORAGE_KEY, JSON.stringify(charts))
+    } catch {}
+  }, [charts])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(BORDERS_STORAGE_KEY, JSON.stringify(borders))
+    } catch {}
+  }, [borders])
 
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme
